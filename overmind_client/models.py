@@ -109,7 +109,6 @@ class InvocationResponse(BaseModel):
 
     invocation_id: str
     agent_id: str
-    policies: List[str]
     raw_input: str
     processed_input: Optional[str]
     raw_output: Optional[str]

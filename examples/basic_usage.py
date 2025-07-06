@@ -9,9 +9,8 @@ from overmind_client import OvermindClient
 def main():
     # Initialize the client with your credentials
     client = OvermindClient(
-        overmind_token="your_overmind_token_here",
+        overmind_api_key="your_overmind_api_key_here",
         openai_api_key="your_openai_api_key_here",
-        base_url="http://localhost:8000",  # Change this to your Overmind server URL
     )
 
     print("=== Overmind Python Client Example ===\n")

@@ -2,6 +2,7 @@
 Tests for the main OvermindClient class.
 """
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -20,14 +21,14 @@ class TestOvermindClient:
     def setup_method(self):
         """Set up test fixtures."""
         self.client = OvermindClient(
-            overmind_token="test_token",
+            overmind_api_key="test_token",
             base_url="http://test.com",
             openai_api_key="test_openai_key",
         )
 
     def test_client_initialization(self):
         """Test client initialization."""
-        assert self.client.overmind_token == "test_token"
+        assert self.client.overmind_api_key == "test_token"
         assert self.client.base_url == "http://test.com"
         assert self.client.provider_parameters == {"openai_api_key": "test_openai_key"}
         assert "Authorization" in self.client.session.headers
@@ -170,6 +171,24 @@ class TestOvermindClient:
         call_args = mock_request.call_args
         request_data = call_args[1]["json"]
         assert request_data["client_init_params"] == custom_init_params
+
+    @patch.dict(os.environ, {"OVERMIND_API_KEY": "env_test_token"})
+    def test_client_initialization_with_env_var(self):
+        """Test client initialization using environment variable."""
+        client = OvermindClient(
+            base_url="http://test.com",
+            openai_api_key="test_openai_key",
+        )
+        assert client.overmind_api_key == "env_test_token"
+
+    def test_client_initialization_no_api_key(self):
+        """Test client initialization without API key raises error."""
+        with pytest.raises(OvermindError) as exc_info:
+            OvermindClient(
+                base_url="http://test.com",
+                openai_api_key="test_openai_key",
+            )
+        assert "No Overmind API key provided" in str(exc_info.value)
 
 
 if __name__ == "__main__":

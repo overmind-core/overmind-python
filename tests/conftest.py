@@ -12,7 +12,7 @@ from overmind_client import OvermindClient
 def overmind_client():
     """Create a test OvermindClient instance."""
     return OvermindClient(
-        overmind_token="test_token",
+        overmind_api_key="test_token",
         base_url="http://test.com",
         openai_api_key="test_openai_key",
     )

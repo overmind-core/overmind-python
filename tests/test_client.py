@@ -21,7 +21,7 @@ class TestClientIntegration:
     def setup_method(self):
         """Set up test fixtures."""
         self.client = OvermindClient(
-            overmind_token="test_token",
+            overmind_api_key="test_token",
             base_url="http://test.com",
             openai_api_key="test_openai_key",
         )

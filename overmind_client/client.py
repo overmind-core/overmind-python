@@ -2,6 +2,7 @@
 Main Overmind client implementation.
 """
 
+import os
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
 
@@ -66,25 +67,38 @@ class OvermindClient:
 
     def __init__(
         self,
-        overmind_token: str,
-        base_url: str,
+        overmind_api_key: Optional[str] = None,
+        base_url: str = "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1",
         **provider_parameters: Dict[str, Any],
     ):
         """
         Initialize the Overmind client.
 
         Args:
-            overmind_token: Your Overmind API token for authentication
+            overmind_api_key: Your Overmind API key for authentication. If not provided,
+                             will try to use OVERMIND_API_KEY environment variable.
             base_url: Base URL of the Overmind API server
             **provider_parameters: Provider-specific credentials (e.g., openai_api_key)
+        
+        Raises:
+            OvermindError: If no API key is provided and OVERMIND_API_KEY environment variable is not set
         """
-        self.overmind_token = overmind_token
+        # Get API key from parameter or environment variable
+        if overmind_api_key is None:
+            overmind_api_key = os.getenv("OVERMIND_API_KEY")
+            if overmind_api_key is None:
+                raise OvermindError(
+                    "No Overmind API key provided. Either pass 'overmind_api_key' parameter "
+                    "or set OVERMIND_API_KEY environment variable."
+                )
+        
+        self.overmind_api_key = overmind_api_key
         self.base_url = base_url.rstrip("/")
         self.provider_parameters = provider_parameters
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {overmind_token}",
+                "Authorization": f"Bearer {overmind_api_key}",
                 "Content-Type": "application/json",
             }
         )
@@ -138,7 +152,7 @@ class OvermindClient:
             )
 
             if response.status_code == 401:
-                raise OvermindAuthenticationError("Invalid Overmind API token")
+                raise OvermindAuthenticationError("Invalid Overmind API key")
 
             if response.status_code >= 400:
                 error_data = response.json() if response.content else {}
@@ -190,5 +204,4 @@ class OvermindClient:
         response_data = self._make_request(
             "POST", f"invocations/invoke/{client_path}", data=payload
         )
-        # return InvocationResponse(**response_data)
-        return response_data
+        return InvocationResponse(**response_data)

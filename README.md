@@ -32,9 +32,9 @@ poetry install --with dev
 ```python
 from overmind_client import OvermindClient
 
-# Initialize the client with your Overmind API token and provider credentials
+# Initialize the client with your Overmind API key and provider credentials
 client = OvermindClient(
-    overmind_token="your_overmind_token",
+    overmind_api_key="your_overmind_api_key",
     openai_api_key="your_openai_api_key",
     base_url="http://localhost:8000"  # Your Overmind server URL
 )
@@ -155,12 +155,12 @@ client.delete_invocation("invocation_id")
 ### Authentication
 
 The client requires:
-- **Overmind API Token**: Your authentication token for the Overmind API
+- **Overmind API Key**: Your authentication key for the Overmind API (can be provided directly or via OVERMIND_API_KEY environment variable)
 - **Provider Credentials**: API keys for the AI providers you want to use
 
 ```python
 client = OvermindClient(
-    overmind_token="your_overmind_token",
+    overmind_api_key="your_overmind_api_key",
     openai_api_key="your_openai_api_key",
     # Add other provider credentials as needed
     # anthropic_api_key="your_anthropic_key",
@@ -174,7 +174,7 @@ By default, the client connects to `http://localhost:8000`. You can specify a di
 
 ```python
 client = OvermindClient(
-    overmind_token="your_token",
+    overmind_api_key="your_api_key",
     openai_api_key="your_key",
     base_url="https://your-overmind-server.com"
 )
@@ -194,7 +194,7 @@ try:
         agent_id="my_agent"
     )
 except OvermindAuthenticationError:
-    print("Invalid API token")
+    print("Invalid API key")
 except OvermindAPIError as e:
     print(f"API error: {e.message} (Status: {e.status_code})")
 except OvermindError as e:
