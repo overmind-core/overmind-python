@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "overmind-client"
+version = "0.1.0"
+description = "Python client for Overmind API"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "overmind_client"}]
+
+[tool.poetry.dependencies]
+python = ">= 3.8"
+requests = "^2.31.0"
+pydantic = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+ruff = "^0.4.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 88 
