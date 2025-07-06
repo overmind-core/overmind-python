@@ -5,6 +5,21 @@ description = "Python client for Overmind API"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 packages = [{include = "overmind_client"}]
+homepage = "https://github.com/overmind-core/overmind-python"
+repository = "https://github.com/overmind-core/overmind-python"
+keywords = ["overmind", "ai", "api", "client", "policy", "enforcement"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 
 [tool.poetry.dependencies]
 python = ">= 3.8"
@@ -18,11 +33,3 @@ ruff = "^0.4.4"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 88
-target-version = ['py38']
-
-[tool.isort]
-profile = "black"
-line_length = 88 
