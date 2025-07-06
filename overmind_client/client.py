@@ -15,6 +15,12 @@ from .policies import PoliciesClient
 from .invocations import InvocationsClient
 
 
+# Mapping of common environment variables to provider parameter names
+COMMON_ENV_VARS = {
+    "OPENAI_API_KEY": "api_key",
+}
+
+
 class ClientPathProxy:
     """
     Proxy object that enables dynamic method chaining for client paths.
@@ -68,7 +74,7 @@ class OvermindClient:
     def __init__(
         self,
         overmind_api_key: Optional[str] = None,
-        base_url: str = "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1",
+        base_url: Optional[str] = None,
         **provider_parameters: Dict[str, Any],
     ):
         """
@@ -91,10 +97,24 @@ class OvermindClient:
                     "No Overmind API key provided. Either pass 'overmind_api_key' parameter "
                     "or set OVERMIND_API_KEY environment variable."
                 )
+
+        if base_url is None:
+            base_url = os.getenv("OVERMIND_API_URL")
+            if base_url is None:
+                base_url = "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1"
         
         self.overmind_api_key = overmind_api_key
         self.base_url = base_url.rstrip("/")
-        self.provider_parameters = provider_parameters
+        
+        # Start with provided provider parameters
+        self.provider_parameters = provider_parameters.copy() if provider_parameters else {}
+        
+        # Add common environment variables if they exist and aren't already in provider_parameters
+        for env_var, param_name in COMMON_ENV_VARS.items():
+            env_value = os.getenv(env_var)
+            if env_value and param_name not in self.provider_parameters:
+                self.provider_parameters[param_name] = env_value
+        
         self.session = requests.Session()
         self.session.headers.update(
             {
