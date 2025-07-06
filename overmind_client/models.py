@@ -5,7 +5,7 @@ Pydantic models for the Overmind client.
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class AgentCreateRequest(BaseModel):
@@ -69,6 +69,13 @@ class PolicyCreateRequest(BaseModel):
     is_input_policy: bool = Field(..., description="Whether this is an input policy")
     is_output_policy: bool = Field(..., description="Whether this is an output policy")
     stats: Optional[Dict[str, Any]] = Field(default={}, description="Policy statistics")
+
+    @model_validator(mode='after')
+    def validate_policy_type(self):
+        """Ensure at least one of is_input_policy or is_output_policy is True."""
+        if not self.is_input_policy and not self.is_output_policy:
+            raise ValueError("At least one of is_input_policy or is_output_policy must be True")
+        return self
 
 
 class PolicyUpdateRequest(BaseModel):

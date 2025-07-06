@@ -62,6 +62,13 @@ class TestOvermindClient:
             "agent_id": "test_agent",
             "raw_input": "test input",
             "raw_output": "test output",
+            "processed_input": "test input",
+            "processed_output": "test output",
+            "invocation_results": {},
+            "policy_results": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"invocation_id": "test_id"}'
         mock_request.return_value = mock_response
@@ -74,7 +81,7 @@ class TestOvermindClient:
         # Verify the request was made with correct parameters
         call_args = mock_request.call_args
         request_data = call_args[1]["json"]
-        assert request_data["client_path"] == "openai.chat.completions.create"
+        assert request_data["agent_id"] == "default_agent"
         assert request_data["client_call_params"]["model"] == "gpt-4o"
         assert request_data["client_init_params"]["openai_api_key"] == "test_openai_key"
 
@@ -126,6 +133,13 @@ class TestOvermindClient:
             "agent_id": "test_agent",
             "raw_input": "test input",
             "raw_output": "test output",
+            "processed_input": "test input",
+            "processed_output": "test output",
+            "invocation_results": {},
+            "policy_results": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"invocation_id": "test_id"}'
         mock_request.return_value = mock_response
@@ -152,6 +166,13 @@ class TestOvermindClient:
             "agent_id": "test_agent",
             "raw_input": "test input",
             "raw_output": "test output",
+            "processed_input": "test input",
+            "processed_output": "test output",
+            "invocation_results": {},
+            "policy_results": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"invocation_id": "test_id"}'
         mock_request.return_value = mock_response

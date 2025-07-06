@@ -28,6 +28,13 @@ class TestPoliciesClient:
         mock_response.json.return_value = {
             "policy_id": "test_policy",
             "policy_description": "Test policy",
+            "parameters": {"param1": "value1"},
+            "engine": "test_engine",
+            "stats": {},
+            "is_input_policy": True,
+            "is_output_policy": False,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"policy_id": "test_policy"}'
         mock_request.return_value = mock_response
@@ -53,10 +60,24 @@ class TestPoliciesClient:
             {
                 "policy_id": "policy1",
                 "policy_description": "Policy 1",
+                "parameters": {},
+                "engine": "test_engine",
+                "stats": {},
+                "is_input_policy": True,
+                "is_output_policy": False,
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
             {
                 "policy_id": "policy2",
                 "policy_description": "Policy 2",
+                "parameters": {},
+                "engine": "test_engine",
+                "stats": {},
+                "is_input_policy": False,
+                "is_output_policy": True,
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
         ]
         mock_response.content = b'[{"policy_id": "policy1"}]'
@@ -77,8 +98,11 @@ class TestPoliciesClient:
             "policy_description": "Test policy",
             "parameters": {"param1": "value1"},
             "engine": "test_engine",
+            "stats": {},
             "is_input_policy": True,
             "is_output_policy": False,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"policy_id": "test_policy"}'
         mock_request.return_value = mock_response

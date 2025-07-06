@@ -31,18 +31,32 @@ class TestInvocationsClient:
                 "agent_id": "agent1",
                 "raw_input": "test input 1",
                 "raw_output": "test output 1",
+                "processed_input": "test input 1",
+                "processed_output": "test output 1",
+                "invocation_results": {},
+                "policy_results": {},
+                "business_id": "test_business",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
             {
                 "invocation_id": "inv2",
                 "agent_id": "agent2",
                 "raw_input": "test input 2",
                 "raw_output": "test output 2",
+                "processed_input": "test input 2",
+                "processed_output": "test output 2",
+                "invocation_results": {},
+                "policy_results": {},
+                "business_id": "test_business",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
         ]
         mock_response.content = b'[{"invocation_id": "inv1"}]'
         mock_request.return_value = mock_response
 
-        result = self.client.invocations.list()
+        result = self.client.invocations.list("test_agent")
         assert len(result) == 2
         assert result[0].invocation_id == "inv1"
         assert result[1].invocation_id == "inv2"
@@ -57,6 +71,13 @@ class TestInvocationsClient:
             "agent_id": "test_agent",
             "raw_input": "test input",
             "raw_output": "test output",
+            "processed_input": "test input",
+            "processed_output": "test output",
+            "invocation_results": {},
+            "policy_results": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"invocation_id": "test_inv"}'
         mock_request.return_value = mock_response
@@ -76,6 +97,13 @@ class TestInvocationsClient:
                 "agent_id": "test_agent",
                 "raw_input": "test input 1",
                 "raw_output": "test output 1",
+                "processed_input": "test input 1",
+                "processed_output": "test output 1",
+                "invocation_results": {},
+                "policy_results": {},
+                "business_id": "test_business",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
         ]
         mock_response.content = b'[{"invocation_id": "inv1"}]'

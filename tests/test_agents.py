@@ -29,6 +29,13 @@ class TestAgentsClient:
             "agent_id": "test_agent",
             "agent_model": "gpt-4o",
             "agent_description": "Test agent",
+            "input_policies": [],
+            "output_policies": [],
+            "stats": {},
+            "parameters": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"agent_id": "test_agent"}'
         mock_request.return_value = mock_response
@@ -52,11 +59,25 @@ class TestAgentsClient:
                 "agent_id": "agent1",
                 "agent_model": "gpt-4o",
                 "agent_description": "Agent 1",
+                "input_policies": [],
+                "output_policies": [],
+                "stats": {},
+                "parameters": {},
+                "business_id": "test_business",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
             {
                 "agent_id": "agent2",
                 "agent_model": "gpt-4o",
                 "agent_description": "Agent 2",
+                "input_policies": [],
+                "output_policies": [],
+                "stats": {},
+                "parameters": {},
+                "business_id": "test_business",
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
             },
         ]
         mock_response.content = b'[{"agent_id": "agent1"}]'
@@ -76,6 +97,13 @@ class TestAgentsClient:
             "agent_id": "test_agent",
             "agent_model": "gpt-4o",
             "agent_description": "Test agent",
+            "input_policies": [],
+            "output_policies": [],
+            "stats": {},
+            "parameters": {},
+            "business_id": "test_business",
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
         }
         mock_response.content = b'{"agent_id": "test_agent"}'
         mock_request.return_value = mock_response
