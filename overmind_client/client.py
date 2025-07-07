@@ -53,10 +53,15 @@ class ClientPathProxy:
         # Construct the full client path
         client_path = ".".join(self.path_parts)
 
+        input_policies = kwargs.pop("input_policies", None)
+        output_policies = kwargs.pop("output_policies", None)
+
         # Invoke the provider through the Overmind API
         return self.client.invoke(
             client_path=client_path,
             client_call_params=kwargs,
+            input_policies=input_policies,
+            output_policies=output_policies,
         )
 
 
@@ -85,7 +90,7 @@ class OvermindClient:
                              will try to use OVERMIND_API_KEY environment variable.
             base_url: Base URL of the Overmind API server
             **provider_parameters: Provider-specific credentials (e.g., openai_api_key)
-        
+
         Raises:
             OvermindError: If no API key is provided and OVERMIND_API_KEY environment variable is not set
         """
@@ -101,20 +106,24 @@ class OvermindClient:
         if base_url is None:
             base_url = os.getenv("OVERMIND_API_URL")
             if base_url is None:
-                base_url = "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1"
-        
+                base_url = (
+                    "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1"
+                )
+
         self.overmind_api_key = overmind_api_key
         self.base_url = base_url.rstrip("/")
-        
+
         # Start with provided provider parameters
-        self.provider_parameters = provider_parameters.copy() if provider_parameters else {}
-        
+        self.provider_parameters = (
+            provider_parameters.copy() if provider_parameters else {}
+        )
+
         # Add common environment variables if they exist and aren't already in provider_parameters
         for env_var, param_name in COMMON_ENV_VARS.items():
             env_value = os.getenv(env_var)
             if env_value and param_name not in self.provider_parameters:
                 self.provider_parameters[param_name] = env_value
-        
+
         self.session = requests.Session()
         self.session.headers.update(
             {

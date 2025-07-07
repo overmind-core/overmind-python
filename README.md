@@ -13,42 +13,100 @@ A Python client for the Overmind API that provides easy access to AI provider en
 
 ## Installation
 
-### From Source
+
 
 ```bash
-cd client
-poetry install
+pip install -i https://test.pypi.org/simple/ overmind-client
 ```
 
-### Development Installation
-
-```bash
-cd client
-poetry install --with dev
-```
 
 ## Quick Start
 
+### Use default Overmind agent
+Below we initialise the Overmind client and call GPT-4o-mini using `default_agent`. This will run our `reject_prompt_injection` and `reject_irrelevant_answer` policies.
 ```python
-from overmind_client import OvermindClient
+import os
+from overmind_client.client import OvermindClient
 
-# Initialize the client with your Overmind API key and provider credentials
-client = OvermindClient(
-    overmind_api_key="your_overmind_api_key",
-    openai_api_key="your_openai_api_key",
-    base_url="http://localhost:8000"  # Your Overmind server URL
-)
+# Set env variables (or pass directly to the client)
+os.environ["OVERMIND_API_KEY"] = "your_overmind_api_key"
+os.environ["OPENAI_API_KEY"] = "youtr_openai_api_key"
 
-# Use OpenAI chat completions with policy enforcement
+overmind = OvermindClient()
+
+
+# Use existing OpenAI client methods
 response = client.openai.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello, world!"}],
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Tell me a joke"}],
     agent_id="default_agent"
 )
-
-print(response.processed_output)
-print(f"Invocation ID: {response.invocation_id}")
 ```
+
+We get the following response - we passed both policies as stated in `policy_results`!
+```python
+InvocationResponse(
+    invocation_id='0ae903b0-e855-4282-abb0-7acfbda2f8cb',
+    agent_id='default_agent',
+    raw_input="[{'role': 'user', 'content': 'Tell me a joke'}]",
+    processed_input="[{'role': 'user', 'content': 'Tell me a joke'}]",
+    raw_output="Why don't scientists trust atoms? \n\nBecause they make up everything!",
+    processed_output="Why don't scientists trust atoms? \n\nBecause they make up everything!",
+    invocation_results={'input': 'passed', 'output': 'passed'},
+    policy_results={'prompt_injection_attempt': False, 'relevant_answer': True},
+    business_id='AgenticCo Ltd',
+    created_at=datetime.datetime(2025, 7, 7, 18, 57, 49, 104204, tzinfo=TzInfo(UTC)),
+    updated_at=None
+)
+```
+
+### Defining your own ad-hoc policies
+There are different policy templates that can be set up at invocation time. For example PII removal policy:
+```python
+input_pii_policy = {
+    'policy_template': 'anonymize_pii',
+    'parameters': {
+        'pii_types': ['DEMOGRAPHIC_DATA', 'GOVERNMENT_ID']
+    }
+}
+
+messages = [
+    {"role": "user", "content": "Hi my name is Jon, born in 1990, passport number 20194812, how old am I?"}
+]
+
+result = overmind.openai.chat.completions.create(
+    model='gpt-4o-mini',
+    messages=messages,
+    input_policies=[input_pii_policy]
+)
+```
+
+This will generate the response below. The `processed_input` is what was actually passed to the LLM, with the sensitive data obfuscated
+```python
+InvocationResponse(
+    invocation_id='cad3c430-357d-4da9-826f-d7b7d4bd76a6',
+    agent_id='default_agent',
+    raw_input="[{'role': 'user', 'content': 'Hi my name is Jon, born in 1990, passport number 20194812, how old am 
+I?'}]",
+    processed_input="[{'role': 'user', 'content': 'Hi my name is [PERSON_NAME], born in [DEMOGRAPHIC_DATA], 
+passport number [GOVERNMENT_ID], how old am I?'}]",
+    raw_output='Hi Jon! If you were born in 1990 and it is now 2023, you would be either 32 or 33 years old, 
+depending on whether your birthday has occurred yet this year.',
+    processed_output=None,
+    invocation_results={'input': 'altered', 'output': 'rejected'},
+    policy_results={
+        'PII_detected': True,
+        'relevant_answer': False,
+        'reason': "The answer assumes specific values for [PERSON_NAME], [DEMOGRAPHIC_DATA], and the current year, 
+which are not provided in the original question, and directly answers a question that wasn't directly answerable 
+from the given information."
+    },
+    business_id='AgenticCo Ltd',
+    created_at=datetime.datetime(2025, 7, 7, 19, 44, 41, 213627, tzinfo=TzInfo(UTC)),
+    updated_at=None
+)
+```
+
 
 ## Usage Examples
 

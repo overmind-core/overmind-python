@@ -4,11 +4,31 @@ Pydantic models for the Overmind client.
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-
+import pprint
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from rich.console import Console
+from rich.pretty import Pretty
+import io
 
-class AgentCreateRequest(BaseModel):
+
+class ReadableBaseModel(BaseModel):
+    """Base model with a readable __repr__ method for better display in Jupyter notebooks."""
+
+    def __repr__(self) -> str:
+        """
+        Generate a rich-formatted string representation for the terminal.
+
+        This is called by the Python REPL when you inspect an object.
+        """
+        # Create a Rich Console that captures output to a string
+        string_buffer = io.StringIO()
+        console = Console(file=string_buffer, force_terminal=True)
+        console.print(self)
+        return string_buffer.getvalue()
+
+
+class AgentCreateRequest(ReadableBaseModel):
     """Model for creating a new agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
@@ -26,7 +46,7 @@ class AgentCreateRequest(BaseModel):
     )
 
 
-class AgentUpdateRequest(BaseModel):
+class AgentUpdateRequest(ReadableBaseModel):
     """Model for updating an existing agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
@@ -44,7 +64,7 @@ class AgentUpdateRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(None, description="Agent parameters")
 
 
-class AgentResponse(BaseModel):
+class AgentResponse(ReadableBaseModel):
     """Model for agent response data."""
 
     agent_id: str
@@ -59,7 +79,7 @@ class AgentResponse(BaseModel):
     updated_at: Optional[datetime]
 
 
-class PolicyCreateRequest(BaseModel):
+class PolicyCreateRequest(ReadableBaseModel):
     """Model for creating a new policy."""
 
     policy_id: str = Field(..., description="Unique identifier for the policy")
@@ -70,15 +90,17 @@ class PolicyCreateRequest(BaseModel):
     is_output_policy: bool = Field(..., description="Whether this is an output policy")
     stats: Optional[Dict[str, Any]] = Field(default={}, description="Policy statistics")
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_policy_type(self):
         """Ensure at least one of is_input_policy or is_output_policy is True."""
         if not self.is_input_policy and not self.is_output_policy:
-            raise ValueError("At least one of is_input_policy or is_output_policy must be True")
+            raise ValueError(
+                "At least one of is_input_policy or is_output_policy must be True"
+            )
         return self
 
 
-class PolicyUpdateRequest(BaseModel):
+class PolicyUpdateRequest(ReadableBaseModel):
     """Model for updating an existing policy."""
 
     policy_id: str = Field(..., description="Unique identifier for the policy")
@@ -96,7 +118,7 @@ class PolicyUpdateRequest(BaseModel):
     stats: Optional[Dict[str, Any]] = Field(None, description="Policy statistics")
 
 
-class PolicyResponse(BaseModel):
+class PolicyResponse(ReadableBaseModel):
     """Model for policy response data."""
 
     policy_id: str
@@ -111,7 +133,7 @@ class PolicyResponse(BaseModel):
     is_built_in: Optional[bool] = False
 
 
-class InvocationResponse(BaseModel):
+class InvocationResponse(ReadableBaseModel):
     """Model for invocation response data."""
 
     invocation_id: str
@@ -127,7 +149,7 @@ class InvocationResponse(BaseModel):
     updated_at: Optional[datetime]
 
 
-class InvokeRequest(BaseModel):
+class InvokeRequest(ReadableBaseModel):
     """Model for invoke request payload."""
 
     agent_id: str = Field(default="default_agent", description="Agent ID to use")
