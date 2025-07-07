@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "overmind-client"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python client for Overmind API"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Overmind Ltd"]
 readme = "README.md"
 packages = [{include = "overmind_client"}]
 homepage = "https://github.com/overmind-core/overmind-python"

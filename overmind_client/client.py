@@ -107,7 +107,7 @@ class OvermindClient:
             base_url = os.getenv("OVERMIND_API_URL")
             if base_url is None:
                 base_url = (
-                    "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com/api/v1"
+                    "https://overmind-backend-dot-hirundo-trial.uc.r.appspot.com"
                 )
 
         self.overmind_api_key = overmind_api_key
