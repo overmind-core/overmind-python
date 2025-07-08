@@ -32,8 +32,8 @@ class AgentCreateRequest(ReadableBaseModel):
     """Model for creating a new agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
-    agent_model: str = Field(..., description="The AI model to use (e.g., 'gpt-4o')")
-    agent_description: str = Field(..., description="Description of the agent")
+    agent_model: Optional[str] = Field(None, description="The AI model to use (e.g., 'gpt-4o')")
+    agent_description: Optional[str] = Field(None, description="Description of the agent")
     input_policies: Optional[List[str]] = Field(
         default=[], description="List of input policy IDs"
     )
@@ -68,12 +68,12 @@ class AgentResponse(ReadableBaseModel):
     """Model for agent response data."""
 
     agent_id: str
-    agent_model: str
-    agent_description: str
-    input_policies: List[str]
-    output_policies: List[str]
-    stats: Dict[str, Any]
-    parameters: Dict[str, Any]
+    agent_model: Optional[str]
+    agent_description: Optional[str]
+    input_policies: Optional[List[str]]
+    output_policies: Optional[List[str]]
+    stats: Optional[Dict[str, Any]]
+    parameters: Optional[Dict[str, Any]]
     business_id: str
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
@@ -85,7 +85,7 @@ class PolicyCreateRequest(ReadableBaseModel):
     policy_id: str = Field(..., description="Unique identifier for the policy")
     policy_description: str = Field(..., description="Description of the policy")
     parameters: Dict[str, Any] = Field(..., description="Policy parameters")
-    engine: str = Field(..., description="Policy engine")
+    policy_template: str = Field(..., description="Policy template")
     is_input_policy: bool = Field(..., description="Whether this is an input policy")
     is_output_policy: bool = Field(..., description="Whether this is an output policy")
     stats: Optional[Dict[str, Any]] = Field(default={}, description="Policy statistics")
@@ -108,7 +108,7 @@ class PolicyUpdateRequest(ReadableBaseModel):
         None, description="Description of the policy"
     )
     parameters: Optional[Dict[str, Any]] = Field(None, description="Policy parameters")
-    engine: Optional[str] = Field(None, description="Policy engine")
+    policy_template: Optional[str] = Field(None, description="Policy template")
     is_input_policy: Optional[bool] = Field(
         None, description="Whether this is an input policy"
     )
@@ -124,7 +124,7 @@ class PolicyResponse(ReadableBaseModel):
     policy_id: str
     policy_description: str
     parameters: Dict[str, Any]
-    engine: str
+    policy_template: str
     stats: Dict[str, Any]
     is_input_policy: bool
     is_output_policy: bool
