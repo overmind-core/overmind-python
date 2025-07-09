@@ -1,0 +1,1 @@
+Currently we have 5 basic policy templates, more to be added soon.
