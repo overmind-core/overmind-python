@@ -46,7 +46,7 @@ class TestModels:
             "policy_id": "test_policy",
             "policy_description": "Test policy",
             "parameters": {"param1": "value1"},
-            "engine": "test_engine",
+            "policy_template": "test_template",
             "is_input_policy": True,
             "is_output_policy": False,
         }
@@ -55,7 +55,7 @@ class TestModels:
         assert policy.policy_id == "test_policy"
         assert policy.policy_description == "Test policy"
         assert policy.parameters == {"param1": "value1"}
-        assert policy.engine == "test_engine"
+        assert policy.policy_template == "test_template"
         assert policy.is_input_policy is True
         assert policy.is_output_policy is False
 
@@ -67,7 +67,7 @@ class TestModels:
                 policy_id="test_policy",
                 policy_description="Test policy",
                 parameters={},
-                engine="test_engine",
+                policy_template="test_template",
                 is_input_policy=False,
                 is_output_policy=False,
             )
@@ -77,7 +77,7 @@ class TestModels:
             policy_id="test_policy",
             policy_description="Test policy",
             parameters={},
-            engine="test_engine",
+            policy_template="test_template",
             is_input_policy=True,
             is_output_policy=True,
         )

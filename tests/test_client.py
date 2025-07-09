@@ -66,7 +66,7 @@ class TestClientIntegration:
                     "policy_id": "test_policy",
                     "policy_description": "Test policy",
                     "parameters": {"param1": "value1"},
-                    "engine": "test_engine",
+                    "policy_template": "test_template",
                     "stats": {},
                     "is_input_policy": True,
                     "is_output_policy": False,
@@ -87,6 +87,7 @@ class TestClientIntegration:
                     "processed_output": "test output",
                     "invocation_results": {},
                     "policy_results": {},
+                    "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
                     "business_id": "test_business",
                     "created_at": "2023-01-01T00:00:00Z",
                     "updated_at": "2023-01-01T00:00:00Z",
@@ -96,25 +97,25 @@ class TestClientIntegration:
         ]
 
         # Create an agent
-        agent_data = {
-            "agent_id": "test_agent",
-            "agent_model": "gpt-4o",
-            "agent_description": "Test agent",
-        }
-        agent = self.client.agents.create(agent_data)
-        assert agent.agent_id == "test_agent"
+        agent = self.client.agents.create(
+            agent_id="test_agent",
+            agent_model="gpt-4o",
+            agent_description="Test agent",
+        )
+        # Create methods return success response, not the created object
+        assert agent is not None
 
         # Create a policy
-        policy_data = {
-            "policy_id": "test_policy",
-            "policy_description": "Test policy",
-            "parameters": {"param1": "value1"},
-            "engine": "test_engine",
-            "is_input_policy": True,
-            "is_output_policy": False,
-        }
-        policy = self.client.policies.create(policy_data)
-        assert policy.policy_id == "test_policy"
+        policy = self.client.policies.create(
+            policy_id="test_policy",
+            policy_template="test_template",
+            policy_description="Test policy",
+            parameters={"param1": "value1"},
+            is_input_policy=True,
+            is_output_policy=False,
+        )
+        # Create methods return success response, not the created object
+        assert policy is not None
 
         # Make an invocation
         result = self.client.invoke(

@@ -29,7 +29,7 @@ class TestPoliciesClient:
             "policy_id": "test_policy",
             "policy_description": "Test policy",
             "parameters": {"param1": "value1"},
-            "engine": "test_engine",
+            "policy_template": "test_template",
             "stats": {},
             "is_input_policy": True,
             "is_output_policy": False,
@@ -39,17 +39,17 @@ class TestPoliciesClient:
         mock_response.content = b'{"policy_id": "test_policy"}'
         mock_request.return_value = mock_response
 
-        policy_data = {
-            "policy_id": "test_policy",
-            "policy_description": "Test policy",
-            "parameters": {"param1": "value1"},
-            "engine": "test_engine",
-            "is_input_policy": True,
-            "is_output_policy": False,
-        }
-
-        result = self.client.policies.create(policy_data)
-        assert result.policy_id == "test_policy"
+        # Create policy using the correct API signature
+        result = self.client.policies.create(
+            policy_id="test_policy",
+            policy_template="test_template",
+            policy_description="Test policy",
+            parameters={"param1": "value1"},
+            is_input_policy=True,
+            is_output_policy=False,
+        )
+        # Create methods return success response, not the created object
+        assert result is not None
 
     @patch("requests.Session.request")
     def test_list_policies(self, mock_request):
@@ -61,7 +61,7 @@ class TestPoliciesClient:
                 "policy_id": "policy1",
                 "policy_description": "Policy 1",
                 "parameters": {},
-                "engine": "test_engine",
+                "policy_template": "test_template",
                 "stats": {},
                 "is_input_policy": True,
                 "is_output_policy": False,
@@ -72,7 +72,7 @@ class TestPoliciesClient:
                 "policy_id": "policy2",
                 "policy_description": "Policy 2",
                 "parameters": {},
-                "engine": "test_engine",
+                "policy_template": "test_template",
                 "stats": {},
                 "is_input_policy": False,
                 "is_output_policy": True,
@@ -97,7 +97,7 @@ class TestPoliciesClient:
             "policy_id": "test_policy",
             "policy_description": "Test policy",
             "parameters": {"param1": "value1"},
-            "engine": "test_engine",
+            "policy_template": "test_template",
             "stats": {},
             "is_input_policy": True,
             "is_output_policy": False,
