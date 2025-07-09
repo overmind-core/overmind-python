@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 import pprint
 from pydantic import BaseModel, Field, field_validator, model_validator
-
+from .formatters import summarise_invocation
 from rich.console import Console
 from rich.pretty import Pretty
 import io
@@ -144,9 +144,13 @@ class InvocationResponse(ReadableBaseModel):
     processed_output: Optional[str]
     invocation_results: Dict[str, Any]
     policy_results: Dict[str, Any]
+    llm_client_response: Optional[Dict[str, Any]]
     business_id: str
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
+
+    def summary(self) -> None:
+        summarise_invocation(self)
 
 
 class InvokeRequest(ReadableBaseModel):

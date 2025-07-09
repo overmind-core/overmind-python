@@ -55,7 +55,7 @@ class ClientPathProxy:
 
         input_policies = kwargs.pop("input_policies", None)
         output_policies = kwargs.pop("output_policies", None)
-        agent_id = kwargs.pop("agent_id", None)
+        agent_id = kwargs.pop("agent_id", "default_agent")
 
         # Invoke the provider through the Overmind API
         return self.client.invoke(
@@ -235,4 +235,5 @@ class OvermindClient:
         response_data = self._make_request(
             "POST", f"invocations/invoke/{client_path}", data=payload
         )
+
         return InvocationResponse(**response_data)
