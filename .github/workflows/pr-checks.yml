@@ -38,6 +38,10 @@ jobs:
         working-directory: ./pr
         run: poetry install --no-interaction --no-root
 
+      - name: Set PYTHONPATH
+        working-directory: ./pr
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
       - name: Run tests
         working-directory: ./pr
         run: |
