@@ -1,5 +1,8 @@
 # Overmind Client
 
+[![CI Checks](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml/badge.svg)](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/overmind.svg)](https://pypi.org/project/overmind/)
+
 A client for the Overmind API that provides easy access to AI provider endpoints with policy enforcement.
 
 ## Features

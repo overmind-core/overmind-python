@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out base branch (main)
+      - name: Check out base branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.base_ref }} # Checkout the main branch
+          ref: ${{ github.base_ref }}
           path: 'main'
 
       - name: Check out PR branch
