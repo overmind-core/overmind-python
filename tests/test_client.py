@@ -6,13 +6,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overmind_client import OvermindClient
-from overmind_client.exceptions import (
+from overmind import OvermindClient
+from overmind.exceptions import (
     OvermindAPIError,
     OvermindAuthenticationError,
     OvermindError,
 )
-from overmind_client.models import AgentCreateRequest, PolicyCreateRequest
+from overmind.models import AgentCreateRequest, PolicyCreateRequest
 
 
 class TestClientIntegration:

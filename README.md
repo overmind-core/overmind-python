@@ -1,6 +1,6 @@
-# Overmind Python Client
+# Overmind Client
 
-A Python client for the Overmind API that provides easy access to AI provider endpoints with policy enforcement.
+A client for the Overmind API that provides easy access to AI provider endpoints with policy enforcement.
 
 ## Features
 
@@ -16,7 +16,7 @@ A Python client for the Overmind API that provides easy access to AI provider en
 
 
 ```bash
-pip install -i https://test.pypi.org/simple/ overmind-client
+pip install overmind
 ```
 
 
@@ -29,7 +29,7 @@ Get your free Overmind API key at [overmind.evallab.dev](overmind.evallab.dev)
 Below we initialise the Overmind client and call GPT-4o-mini using `default_agent`. This will run our `reject_prompt_injection` and `reject_irrelevant_answer` policies.
 ```python
 import os
-from overmind_client.client import OvermindClient
+from overmind.client import OvermindClient
 
 # Set env variables (or pass directly to the client)
 # Get your free overmind API key at overmind.evallab.dev

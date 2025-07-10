@@ -1,0 +1,73 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test_and_check_version:
+    name: Test and Check Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out base branch (main)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }} # Checkout the main branch
+          path: 'main'
+
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          path: 'pr'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        working-directory: ./pr
+        run: poetry install --no-interaction --no-root
+
+      - name: Run tests
+        working-directory: ./pr
+        run: |
+          source .venv/bin/activate
+          poetry run pytest
+
+      - name: Check for version increment
+        id: check_version
+        run: |
+          # Install yq, a lightweight and portable command-line YAML, JSON and XML processor
+          pip install yq
+
+          # Extract version from the main branch's pyproject.toml
+          main_version=$(yq -r '.tool.poetry.version' main/pyproject.toml)
+          echo "Version on main: $main_version"
+
+          # Extract version from the PR branch's pyproject.toml
+          pr_version=$(yq -r '.tool.poetry.version' pr/pyproject.toml)
+          echo "Version on PR branch: $pr_version"
+
+          if [ "$main_version" == "$pr_version" ]; then
+            echo "Version has not been incremented from main."
+            exit 1
+          fi
+
+          # A simple version comparison. For more robust semver comparison, a dedicated tool might be needed.
+          # This check assumes versions are in a format that can be sorted lexicographically (e.g., 0.1.0, 0.1.1, 0.2.0)
+          if [ "$(printf '%s\n' "$main_version" "$pr_version" | sort -V | head -n1)" != "$main_version" ]; then
+             echo "PR version ($pr_version) is not greater than main version ($main_version)."
+             exit 1
+          fi
+
+          echo "Version check passed!"
