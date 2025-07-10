@@ -55,11 +55,11 @@ jobs:
           pip install toml-cli
 
           # Extract version from the main branch's pyproject.toml
-          main_version=$(toml get main/pyproject.toml tool.poetry.version)
+          main_version=$(toml get main/pyproject.toml "tool.poetry.version")
           echo "Version on main: $main_version"
 
           # Extract version from the PR branch's pyproject.toml
-          pr_version=$(toml get pr/pyproject.toml tool.poetry.version)
+          pr_version=$(toml get pr/pyproject.toml "tool.poetry.version")
           echo "Version on PR branch: $pr_version"
 
           if [ "$main_version" == "$pr_version" ]; then
