@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overmind_client import OvermindClient
+from overmind import OvermindClient
 
 
 class TestInvocationsClient:

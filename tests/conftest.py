@@ -5,11 +5,11 @@ Shared pytest fixtures and configuration.
 import pytest
 from unittest.mock import Mock
 
-from overmind_client import OvermindClient
+from overmind import OvermindClient
 
 
 @pytest.fixture
-def overmind_client():
+def overmind():
     """Create a test OvermindClient instance."""
     return OvermindClient(
         overmind_api_key="test_token",
