@@ -51,15 +51,15 @@ jobs:
       - name: Check for version increment
         id: check_version
         run: |
-          # Install yq, a lightweight and portable command-line YAML, JSON and XML processor
-          pip install yq
+          # Install toml-cli, a tool for reading TOML files
+          pip install toml-cli
 
           # Extract version from the main branch's pyproject.toml
-          main_version=$(yq -r '.tool.poetry.version' main/pyproject.toml)
+          main_version=$(toml get main/pyproject.toml tool.poetry.version)
           echo "Version on main: $main_version"
 
           # Extract version from the PR branch's pyproject.toml
-          pr_version=$(yq -r '.tool.poetry.version' pr/pyproject.toml)
+          pr_version=$(toml get pr/pyproject.toml tool.poetry.version)
           echo "Version on PR branch: $pr_version"
 
           if [ "$main_version" == "$pr_version" ]; then
@@ -67,8 +67,8 @@ jobs:
             exit 1
           fi
 
-          # A simple version comparison. For more robust semver comparison, a dedicated tool might be needed.
-          # This check assumes versions are in a format that can be sorted lexicographically (e.g., 0.1.0, 0.1.1, 0.2.0)
+          # The `sort -V` command handles version numbers correctly.
+          # It understands that 0.1.10 is greater than 0.1.9.
           if [ "$(printf '%s\n' "$main_version" "$pr_version" | sort -V | head -n1)" != "$main_version" ]; then
              echo "PR version ($pr_version) is not greater than main version ($main_version)."
              exit 1
