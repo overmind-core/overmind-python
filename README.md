@@ -27,7 +27,7 @@ pip install overmind
 
 ### Use default Overmind agent
 
-Get your free Overmind API key at [overmind.evallab.dev](overmind.evallab.dev)
+Get your free Overmind API key at [overmind.evallab.dev](https://overmind.evallab.dev)
 
 Below we initialise the Overmind client and call GPT-4o-mini using `default_agent`. This will run our `reject_prompt_injection` and `reject_irrelevant_answer` policies.
 ```python
@@ -37,17 +37,19 @@ from overmind.client import OvermindClient
 # Set env variables (or pass directly to the client)
 # Get your free overmind API key at overmind.evallab.dev
 os.environ["OVERMIND_API_KEY"] = "your_overmind_api_key"
-os.environ["OPENAI_API_KEY"] = "youtr_openai_api_key"
+os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
 
 overmind = OvermindClient()
 
 
 # Use existing OpenAI client methods
-response = client.openai.chat.completions.create(
+response = overmind.openai.chat.completions.create(
     model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Tell me a joke"}],
+    messages=[{"role": "user", "content": "Tell me a joke about LLMs"}],
     agent_id="default_agent"
 )
+
+response.summary()
 ```
 
 
@@ -83,12 +85,14 @@ messages = [
 ]
 
 # Use existing OpenAI client methods but now you can pass your policies
-result = overmind.openai.chat.completions.create(
+response = overmind.openai.chat.completions.create(
     model='gpt-4o-mini',
     messages=messages,
     input_policies=[input_pii_policy],
     output_policies=[output_llm_judge_criteria]
 )
+
+response.summary()
 ```
 ## Further usage
 
@@ -98,4 +102,4 @@ We are not storing your API keys and you are solely responsible for managing the
 
 On ours side we run policy executions for free as this is an alpha stage product. We may impose usage limits and scale our services up and down from time to time.
 
-We apprecaite any feedback, collaboration or other suggestions. You can reach out at [support@evallab.dev](mailto:support@evallab.dev)
+We appreciate any feedback, collaboration or other suggestions. You can reach out at [support@evallab.dev](mailto:support@evallab.dev)
