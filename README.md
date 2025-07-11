@@ -7,12 +7,9 @@ A client for the Overmind API that provides easy access to AI provider endpoints
 
 ## Features
 
-- **Dynamic Provider Access**: Access any supported AI provider through a unified interface
-- **Policy Enforcement**: Automatically applies input and output policies to your requests
-- **Agent Management**: Create, list, edit, and delete agents
-- **Policy Management**: Manage custom policies for your business
-- **Invocation History**: Track and manage your API invocations
-- **Type Safety**: Full type hints and Pydantic models for request/response validation
+- **Easy Integration**: Use major providers like OpenAI with the same call signatures
+- **Policy Enforcement**: Apply customizable policies to your LLM inputs and outputs
+- **Observability**: Log and explore all LLM calls and policy results
 
 ## Installation
 
@@ -96,7 +93,7 @@ response.summary()
 ```
 ## Further usage
 
-There is a more detailed [tutorial notebook](docs/overmind_tutorial.ipynb) available.
+There is a more detailed [tutorial notebook](https://github.com/overmind-core/overmind-python/blob/main/docs/overmind_tutorial.ipynb) available.
 
 We are not storing your API keys and you are solely responsible for managing them and the associated costs.
 
