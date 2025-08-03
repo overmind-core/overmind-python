@@ -87,7 +87,9 @@ class TestClientIntegration:
                     "processed_output": "test output",
                     "invocation_results": {},
                     "policy_results": {},
-                    "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
+                    "llm_client_response": {
+                        "choices": [{"message": {"content": "Hello"}}]
+                    },
                     "business_id": "test_business",
                     "created_at": "2023-01-01T00:00:00Z",
                     "updated_at": "2023-01-01T00:00:00Z",

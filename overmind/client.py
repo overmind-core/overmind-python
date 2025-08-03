@@ -13,7 +13,7 @@ from .models import InvocationResponse
 from .agents import AgentsClient
 from .policies import PoliciesClient
 from .invocations import InvocationsClient
-
+from .utils.api_settings import get_api_settings
 
 # Mapping of common environment variables to provider parameter names
 COMMON_ENV_VARS = {
@@ -96,24 +96,9 @@ class OvermindClient:
         Raises:
             OvermindError: If no API key is provided and OVERMIND_API_KEY environment variable is not set
         """
-        # Get API key from parameter or environment variable
-        if overmind_api_key is None:
-            overmind_api_key = os.getenv("OVERMIND_API_KEY")
-            if overmind_api_key is None:
-                raise OvermindError(
-                    "No Overmind API key provided. Either pass 'overmind_api_key' parameter "
-                    "or set OVERMIND_API_KEY environment variable."
-                )
-
-        if base_url is None:
-            base_url = os.getenv("OVERMIND_API_URL")
-            if base_url is None:
-                base_url = (
-                    "https://api.evallab.dev"
-                )
-
-        self.overmind_api_key = overmind_api_key
-        self.base_url = base_url.rstrip("/")
+        self.overmind_api_key, self.base_url = get_api_settings(
+            overmind_api_key, base_url
+        )
 
         # Start with provided provider parameters
         self.provider_parameters = (
@@ -129,7 +114,7 @@ class OvermindClient:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {overmind_api_key}",
+                "Authorization": f"Bearer {self.overmind_api_key}",
                 "Content-Type": "application/json",
             }
         )

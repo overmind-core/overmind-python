@@ -29,7 +29,7 @@ class PoliciesClient:
     ) -> PolicyResponse:
         """
         Create a new policy.
-        
+
         Args:
             policy_id: Unique identifier for the policy
             policy_description: Description of the policy
@@ -66,7 +66,7 @@ class PoliciesClient:
     def list(self, policy_type: Optional[str] = None) -> List[PolicyResponse]:
         """
         List all policies with optional filtering by type.
-        
+
         Args:
             policy_type: Optional filter to show only input or output policies
         """
@@ -79,7 +79,7 @@ class PoliciesClient:
     def get(self, policy_id: str) -> PolicyResponse:
         """
         Get a specific policy by ID.
-        
+
         Args:
             policy_id: The unique identifier of the policy to retrieve
         """
@@ -100,7 +100,7 @@ class PoliciesClient:
     ) -> Dict[str, str]:
         """
         Update an existing policy.
-        
+
         Args:
             policy_id: Unique identifier for the policy
             policy_description: Description of the policy
@@ -136,7 +136,7 @@ class PoliciesClient:
     def delete(self, policy_id: str) -> Dict[str, str]:
         """
         Delete a policy by ID.
-        
+
         Args:
             policy_id: The unique identifier of the policy to delete
         """

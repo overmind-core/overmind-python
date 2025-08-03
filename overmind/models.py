@@ -32,8 +32,12 @@ class AgentCreateRequest(ReadableBaseModel):
     """Model for creating a new agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
-    agent_model: Optional[str] = Field(None, description="The AI model to use (e.g., 'gpt-4o')")
-    agent_description: Optional[str] = Field(None, description="Description of the agent")
+    agent_model: Optional[str] = Field(
+        None, description="The AI model to use (e.g., 'gpt-4o')"
+    )
+    agent_description: Optional[str] = Field(
+        None, description="Description of the agent"
+    )
     input_policies: Optional[List[str]] = Field(
         default=[], description="List of input policy IDs"
     )
