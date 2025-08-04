@@ -173,3 +173,11 @@ class InvokeRequest(ReadableBaseModel):
     output_policies: Optional[List[str]] = Field(
         default=None, description="Output policies to apply"
     )
+
+
+class LayerResponse(BaseModel):
+    """Model for invocation response data."""
+
+    policy_results: Dict[str, Any]
+    overall_policy_outcome: str
+    processed_data: str

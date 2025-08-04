@@ -33,6 +33,7 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
         debug: bool = False,
     ):
         super().__init__()
+        self.debug = debug
         self.overmind_api_key, _, self.traces_base_url = get_api_settings(
             overmind_api_key, None, traces_base_url
         )
@@ -44,8 +45,7 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
 
         self.run_spans = {}
         self.graph = graph.get_graph() if graph else None
-        self.debug = debug
-        
+
     def parse_graph(self, graph: StateGraph):
         return {
             "nodes": list(graph.nodes.keys()),
@@ -106,10 +106,21 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
     def on_chain_end(self, outputs, *, run_id, **kwargs):
         run_id = str(run_id)
 
+        if "policy_results" in outputs:
+            self.run_spans[run_id].set_attribute(
+                "policy_outcome", outputs["overall_policy_outcome"]
+            )
+            self.run_spans[run_id].set_attribute(
+                "policy_results", serialize(outputs.pop("policy_results"))
+            )
+
         self.run_spans[run_id].set_attribute("outputs", serialize(outputs))
+        self.run_spans[run_id].set_status(trace.Status(trace.StatusCode.OK))
         self.run_spans[run_id].end()
 
     def on_chain_error(self, error, *, run_id, **kwargs):
         run_id = str(run_id)
         self.run_spans[run_id].set_attribute("error", str(error))
+        self.run_spans[run_id].set_status(trace.Status(trace.StatusCode.ERROR))
+        self.run_spans[run_id].record_exception(error)
         self.run_spans[run_id].end()
