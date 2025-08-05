@@ -29,7 +29,7 @@ class AgentsClient:
     ) -> Dict[str, str]:
         """
         Create a new agent.
-        
+
         Args:
             agent_id: Unique identifier for the agent
             agent_model: The AI model to use (e.g., 'gpt-4o')
@@ -71,7 +71,7 @@ class AgentsClient:
     def get(self, agent_id: str) -> AgentResponse:
         """
         Get a specific agent by ID.
-        
+
         Args:
             agent_id: The unique identifier of the agent to retrieve
         """
@@ -92,7 +92,7 @@ class AgentsClient:
     ) -> Dict[str, str]:
         """
         Update an existing agent.
-        
+
         Args:
             agent_id: Unique identifier for the agent
             agent_model: The AI model to use (e.g., 'gpt-4o')
@@ -128,7 +128,7 @@ class AgentsClient:
     def delete(self, agent_id: str) -> Dict[str, str]:
         """
         Delete an agent by ID.
-        
+
         Args:
             agent_id: The unique identifier of the agent to delete
         """

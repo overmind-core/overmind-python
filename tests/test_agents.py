@@ -39,7 +39,7 @@ class TestAgentsClient:
         }
         mock_response.content = b'{"agent_id": "test_agent"}'
         mock_request.return_value = mock_response
-    
+
         # Create agent using the correct API signature
         result = self.client.agents.create(
             agent_id="test_agent",

@@ -3,17 +3,18 @@ Main Overmind client implementation.
 """
 
 import os
-from typing import Any, Dict, List, Optional, Union
+from functools import lru_cache
+from typing import Any, Dict, List, Optional, Sequence, Union
 from urllib.parse import urljoin
 
 import requests
 
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
-from .models import InvocationResponse
+from .models import InvocationResponse, LayerResponse
 from .agents import AgentsClient
 from .policies import PoliciesClient
 from .invocations import InvocationsClient
-
+from .utils.api_settings import get_api_settings
 
 # Mapping of common environment variables to provider parameter names
 COMMON_ENV_VARS = {
@@ -96,24 +97,9 @@ class OvermindClient:
         Raises:
             OvermindError: If no API key is provided and OVERMIND_API_KEY environment variable is not set
         """
-        # Get API key from parameter or environment variable
-        if overmind_api_key is None:
-            overmind_api_key = os.getenv("OVERMIND_API_KEY")
-            if overmind_api_key is None:
-                raise OvermindError(
-                    "No Overmind API key provided. Either pass 'overmind_api_key' parameter "
-                    "or set OVERMIND_API_KEY environment variable."
-                )
-
-        if base_url is None:
-            base_url = os.getenv("OVERMIND_API_URL")
-            if base_url is None:
-                base_url = (
-                    "https://api.evallab.dev"
-                )
-
-        self.overmind_api_key = overmind_api_key
-        self.base_url = base_url.rstrip("/")
+        self.overmind_api_key, self.base_url, self.traces_base_url = get_api_settings(
+            overmind_api_key, base_url, None
+        )
 
         # Start with provided provider parameters
         self.provider_parameters = (
@@ -129,7 +115,7 @@ class OvermindClient:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {overmind_api_key}",
+                "Authorization": f"Bearer {self.overmind_api_key}",
                 "Content-Type": "application/json",
             }
         )
@@ -237,3 +223,55 @@ class OvermindClient:
         )
 
         return InvocationResponse(**response_data)
+
+
+class OvermindLayersClient:
+    def __init__(
+        self,
+        overmind_api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        traces_base_url: Optional[str] = None,
+    ):
+        self.overmind_api_key, self.base_url, self.traces_base_url = get_api_settings(
+            overmind_api_key, base_url, traces_base_url
+        )
+        self.session = requests.Session()
+        self.session.headers.update(
+            {
+                "Authorization": f"Bearer {self.overmind_api_key}",
+                "Content-Type": "application/json",
+            }
+        )
+
+    def run_layer(
+        self, input_data: str, policies: Sequence[str | dict]
+    ) -> LayerResponse:
+        """
+        Run a layer of the Overmind API.
+        """
+        payload = {
+            "input_data": input_data,
+            "policies": policies,
+        }
+
+        response_data = self.session.request(
+            "POST", f"{self.base_url}/api/v1/layers/run", json=payload
+        )
+
+        if response_data.status_code != 200:
+            raise OvermindAPIError(
+                message=response_data.text,
+                status_code=response_data.status_code,
+                response_data=response_data.json(),
+            )
+
+        return LayerResponse(**response_data.json())
+
+
+@lru_cache
+def get_layers_client(
+    overmind_api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    traces_base_url: Optional[str] = None,
+):
+    return OvermindLayersClient(overmind_api_key, base_url, traces_base_url)

@@ -5,6 +5,10 @@ on:
     branches:
       - main
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'README.md'
 
 jobs:
   test_and_check_version:
