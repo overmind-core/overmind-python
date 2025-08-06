@@ -4,11 +4,8 @@ from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-import os
 import json
 from langgraph.graph import StateGraph
-import logging
-import sys
 from typing import Optional
 from overmind.utils.api_settings import get_api_settings
 
@@ -112,6 +109,11 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
             )
             self.run_spans[run_id].set_attribute(
                 "policy_results", serialize(outputs.pop("policy_results"))
+            )
+            # can't add links to the span that has been started and there is no clean way to pass
+            # this span to the backend at the layer run time (since it happening in a downstream node)
+            self.run_spans[run_id].set_attribute(
+                "span_context", serialize(outputs.pop("span_context"))
             )
 
         self.run_spans[run_id].set_attribute("outputs", serialize(outputs))

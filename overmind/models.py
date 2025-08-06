@@ -181,3 +181,4 @@ class LayerResponse(BaseModel):
     policy_results: Dict[str, Any]
     overall_policy_outcome: str
     processed_data: str
+    span_context: Dict[str, Any]
