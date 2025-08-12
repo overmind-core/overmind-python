@@ -4,21 +4,10 @@ from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-import json
 from langgraph.graph import StateGraph
 from typing import Optional
 from overmind.utils.api_settings import get_api_settings
-
-
-def pydantic_serializer(obj):
-    """A JSON serializer for objects with a .model_dump() method."""
-    if hasattr(obj, "model_dump"):
-        return obj.model_dump()
-    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
-
-
-def serialize(obj):
-    return json.dumps(obj, default=pydantic_serializer)
+from overmind.utils.serializers import serialize
 
 
 class OvermindObservabilityCallback(BaseCallbackHandler):

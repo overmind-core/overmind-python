@@ -15,6 +15,8 @@ from .agents import AgentsClient
 from .policies import PoliciesClient
 from .invocations import InvocationsClient
 from .utils.api_settings import get_api_settings
+from .utils.serializers import serialize
+from .models import ProxyRunResponse
 
 # Mapping of common environment variables to provider parameter names
 COMMON_ENV_VARS = {
@@ -61,7 +63,7 @@ class ClientPathProxy:
         # Invoke the provider through the Overmind API
         return self.client.invoke(
             client_path=client_path,
-            client_call_params=kwargs,
+            client_call_params=serialize(kwargs),
             input_policies=input_policies,
             output_policies=output_policies,
             agent_id=agent_id,
@@ -219,10 +221,10 @@ class OvermindClient:
         }
 
         response_data = self._make_request(
-            "POST", f"invocations/invoke/{client_path}", data=payload
+            "POST", f"proxy/run/{client_path}", data=payload
         )
 
-        return InvocationResponse(**response_data)
+        return ProxyRunResponse(**response_data)
 
 
 class OvermindLayersClient:

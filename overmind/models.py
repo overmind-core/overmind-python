@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 import pprint
 from pydantic import BaseModel, Field, field_validator, model_validator
-from .formatters import summarise_invocation
+from .utils.formatters import summarize_proxy_run
 from rich.console import Console
 from rich.pretty import Pretty
 import io
@@ -137,44 +137,6 @@ class PolicyResponse(ReadableBaseModel):
     is_built_in: Optional[bool] = False
 
 
-class InvocationResponse(ReadableBaseModel):
-    """Model for invocation response data."""
-
-    invocation_id: str
-    agent_id: str
-    raw_input: str
-    processed_input: Optional[str]
-    raw_output: Optional[str]
-    processed_output: Optional[str]
-    invocation_results: Dict[str, Any]
-    policy_results: Dict[str, Any]
-    llm_client_response: Optional[Dict[str, Any]]
-    business_id: str
-    created_at: Optional[datetime]
-    updated_at: Optional[datetime]
-
-    def summary(self) -> None:
-        summarise_invocation(self)
-
-
-class InvokeRequest(ReadableBaseModel):
-    """Model for invoke request payload."""
-
-    agent_id: str = Field(default="default_agent", description="Agent ID to use")
-    client_call_params: Dict[str, Any] = Field(
-        ..., description="Parameters for the client call"
-    )
-    client_init_params: Optional[Dict[str, Any]] = Field(
-        default={}, description="Parameters for client initialization"
-    )
-    input_policies: Optional[List[str]] = Field(
-        default=None, description="Input policies to apply"
-    )
-    output_policies: Optional[List[str]] = Field(
-        default=None, description="Output policies to apply"
-    )
-
-
 class LayerResponse(BaseModel):
     """Model for invocation response data."""
 
@@ -182,3 +144,16 @@ class LayerResponse(BaseModel):
     overall_policy_outcome: str
     processed_data: str
     span_context: Dict[str, Any]
+
+
+class ProxyRunResponse(ReadableBaseModel):
+    """Model for proxy run response data."""
+
+    llm_client_response: Dict[str, Any]
+    input_layer_results: Dict[str, Any]
+    output_layer_results: Dict[str, Any]
+    processed_output: Any
+    processed_input: Any
+
+    def summary(self) -> None:
+        summarize_proxy_run(self)
