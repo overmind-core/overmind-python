@@ -4,24 +4,10 @@ from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-import os
-import json
 from langgraph.graph import StateGraph
-import logging
-import sys
 from typing import Optional
 from overmind.utils.api_settings import get_api_settings
-
-
-def pydantic_serializer(obj):
-    """A JSON serializer for objects with a .model_dump() method."""
-    if hasattr(obj, "model_dump"):
-        return obj.model_dump()
-    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
-
-
-def serialize(obj):
-    return json.dumps(obj, default=pydantic_serializer)
+from overmind.utils.serializers import serialize
 
 
 class OvermindObservabilityCallback(BaseCallbackHandler):
@@ -112,6 +98,11 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
             )
             self.run_spans[run_id].set_attribute(
                 "policy_results", serialize(outputs.pop("policy_results"))
+            )
+            # can't add links to the span that has been started and there is no clean way to pass
+            # this span to the backend at the layer run time (since it happening in a downstream node)
+            self.run_spans[run_id].set_attribute(
+                "span_context", serialize(outputs.pop("span_context"))
             )
 
         self.run_spans[run_id].set_attribute("outputs", serialize(outputs))

@@ -37,7 +37,6 @@ class TestOvermindClient:
         # Test sub-clients are initialized
         assert hasattr(self.client, "agents")
         assert hasattr(self.client, "policies")
-        assert hasattr(self.client, "invocations")
 
     def test_dynamic_provider_access(self):
         """Test dynamic provider access."""
@@ -58,20 +57,15 @@ class TestOvermindClient:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "invocation_id": "test_id",
-            "agent_id": "test_agent",
-            "raw_input": "test input",
-            "raw_output": "test output",
+            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
+            "input_layer_results": {},
+            "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
-            "invocation_results": {},
-            "policy_results": {},
-            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
-            "business_id": "test_business",
-            "created_at": "2023-01-01T00:00:00Z",
-            "updated_at": "2023-01-01T00:00:00Z",
         }
-        mock_response.content = b'{"invocation_id": "test_id"}'
+        mock_response.content = (
+            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
+        )
         mock_request.return_value = mock_response
 
         # Call the provider through dynamic access
@@ -83,7 +77,11 @@ class TestOvermindClient:
         call_args = mock_request.call_args
         request_data = call_args[1]["json"]
         assert request_data["agent_id"] == "default_agent"
-        assert request_data["client_call_params"]["model"] == "gpt-4o"
+        # client_call_params is serialized to JSON string
+        import json
+
+        client_call_params = json.loads(request_data["client_call_params"])
+        assert client_call_params["model"] == "gpt-4o"
         assert request_data["client_init_params"]["openai_api_key"] == "test_openai_key"
 
     @patch("requests.Session.request")
@@ -130,20 +128,15 @@ class TestOvermindClient:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "invocation_id": "test_id",
-            "agent_id": "test_agent",
-            "raw_input": "test input",
-            "raw_output": "test output",
+            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
+            "input_layer_results": {},
+            "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
-            "invocation_results": {},
-            "policy_results": {},
-            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
-            "business_id": "test_business",
-            "created_at": "2023-01-01T00:00:00Z",
-            "updated_at": "2023-01-01T00:00:00Z",
         }
-        mock_response.content = b'{"invocation_id": "test_id"}'
+        mock_response.content = (
+            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
+        )
         mock_request.return_value = mock_response
 
         result = self.client.invoke(
@@ -155,8 +148,8 @@ class TestOvermindClient:
             agent_id="test_agent",
         )
 
-        assert result.invocation_id == "test_id"
-        assert result.agent_id == "test_agent"
+        assert result.llm_client_response["choices"][0]["message"]["content"] == "Hello"
+        assert result.processed_input == "test input"
 
     @patch("requests.Session.request")
     def test_invoke_method_with_custom_init_params(self, mock_request):
@@ -164,20 +157,15 @@ class TestOvermindClient:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "invocation_id": "test_id",
-            "agent_id": "test_agent",
-            "raw_input": "test input",
-            "raw_output": "test output",
+            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
+            "input_layer_results": {},
+            "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
-            "invocation_results": {},
-            "policy_results": {},
-            "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
-            "business_id": "test_business",
-            "created_at": "2023-01-01T00:00:00Z",
-            "updated_at": "2023-01-01T00:00:00Z",
         }
-        mock_response.content = b'{"invocation_id": "test_id"}'
+        mock_response.content = (
+            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
+        )
         mock_request.return_value = mock_response
 
         custom_init_params = {"api_key": "custom_key"}

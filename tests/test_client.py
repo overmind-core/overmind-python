@@ -30,7 +30,6 @@ class TestClientIntegration:
         """Test that the client has all expected subclients."""
         assert hasattr(self.client, "agents")
         assert hasattr(self.client, "policies")
-        assert hasattr(self.client, "invocations")
 
     def test_client_has_dynamic_provider_access(self):
         """Test that the client supports dynamic provider access."""
@@ -79,22 +78,15 @@ class TestClientIntegration:
             Mock(
                 status_code=200,
                 json=lambda: {
-                    "invocation_id": "test_inv",
-                    "agent_id": "test_agent",
-                    "raw_input": "test input",
-                    "raw_output": "test output",
-                    "processed_input": "test input",
-                    "processed_output": "test output",
-                    "invocation_results": {},
-                    "policy_results": {},
                     "llm_client_response": {
                         "choices": [{"message": {"content": "Hello"}}]
                     },
-                    "business_id": "test_business",
-                    "created_at": "2023-01-01T00:00:00Z",
-                    "updated_at": "2023-01-01T00:00:00Z",
+                    "input_layer_results": {},
+                    "output_layer_results": {},
+                    "processed_input": "test input",
+                    "processed_output": "test output",
                 },
-                content=b'{"invocation_id": "test_inv"}',
+                content=b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}',
             ),
         ]
 
@@ -128,8 +120,8 @@ class TestClientIntegration:
             },
             agent_id="test_agent",
         )
-        assert result.invocation_id == "test_inv"
-        assert result.agent_id == "test_agent"
+        assert result.llm_client_response["choices"][0]["message"]["content"] == "Hello"
+        assert result.processed_input == "test input"
 
         # Verify all expected requests were made
         assert mock_request.call_count == 3

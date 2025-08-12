@@ -10,11 +10,12 @@ from urllib.parse import urljoin
 import requests
 
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
-from .models import InvocationResponse, LayerResponse
+from .models import LayerResponse
 from .agents import AgentsClient
 from .policies import PoliciesClient
-from .invocations import InvocationsClient
 from .utils.api_settings import get_api_settings
+from .utils.serializers import serialize
+from .models import ProxyRunResponse
 
 # Mapping of common environment variables to provider parameter names
 COMMON_ENV_VARS = {
@@ -61,7 +62,7 @@ class ClientPathProxy:
         # Invoke the provider through the Overmind API
         return self.client.invoke(
             client_path=client_path,
-            client_call_params=kwargs,
+            client_call_params=serialize(kwargs),
             input_policies=input_policies,
             output_policies=output_policies,
             agent_id=agent_id,
@@ -76,7 +77,6 @@ class OvermindClient:
     - Dynamic provider access (e.g., client.openai.chat.completions.create)
     - Agent management via client.agents.{methods}
     - Policy management via client.policies.{methods}
-    - Invocation management via client.invocations.{methods}
     """
 
     def __init__(
@@ -123,7 +123,6 @@ class OvermindClient:
         # Initialize sub-clients
         self.agents = AgentsClient(self)
         self.policies = PoliciesClient(self)
-        self.invocations = InvocationsClient(self)
 
         # Cache for provider proxies
         self._provider_proxies = {}
@@ -192,7 +191,7 @@ class OvermindClient:
         client_init_params: Optional[Dict[str, Any]] = None,
         input_policies: Optional[List[str]] = None,
         output_policies: Optional[List[str]] = None,
-    ) -> InvocationResponse:
+    ) -> ProxyRunResponse:
         """
         Invoke an AI provider through the Overmind API.
 
@@ -205,7 +204,7 @@ class OvermindClient:
             output_policies: Output policies to apply
 
         Returns:
-            InvocationResponse object
+            ProxyRunResponse object
         """
         # Use provided client_init_params or fall back to stored provider_parameters
         init_params = client_init_params or self.provider_parameters
@@ -219,10 +218,10 @@ class OvermindClient:
         }
 
         response_data = self._make_request(
-            "POST", f"invocations/invoke/{client_path}", data=payload
+            "POST", f"proxy/run/{client_path}", data=payload
         )
 
-        return InvocationResponse(**response_data)
+        return ProxyRunResponse(**response_data)
 
 
 class OvermindLayersClient:
