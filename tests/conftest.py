@@ -57,18 +57,3 @@ def mock_policy_response():
     }
     response.content = b'{"policy_id": "test_policy"}'
     return response
-
-
-@pytest.fixture
-def mock_invocation_response():
-    """Create a mock response for invocation operations."""
-    response = Mock()
-    response.status_code = 200
-    response.json.return_value = {
-        "invocation_id": "test_inv",
-        "agent_id": "test_agent",
-        "raw_input": "test input",
-        "raw_output": "test output",
-    }
-    response.content = b'{"invocation_id": "test_inv"}'
-    return response
