@@ -22,11 +22,11 @@ pip install overmind
 
 ## Quick Start
 
-### Use default Overmind agent
+### Use Overmind Proxy
 
 Get your free Overmind API key at [overmind.evallab.dev](https://overmind.evallab.dev)
 
-Below we initialise the Overmind client and call GPT-4o-mini using `default_agent`. This will run our `reject_prompt_injection` and `reject_irrelevant_answer` policies.
+Below we initialise the Overmind client and call GPT-5-mini with `anonymize_pii` and `reject_irrelevant_answer` policies. This will prevent PII data leakage and ensure only relevant answers are produced.
 ```python
 import os
 from overmind.client import OvermindClient
@@ -40,10 +40,12 @@ overmind = OvermindClient()
 
 
 # Use existing OpenAI client methods
-response = overmind.openai.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Tell me a joke about LLMs"}],
-    agent_id="default_agent"
+response = overmind.openai.responses.create(
+    model='gpt-5-mini',
+    input="Should I switch my mortgage now or wait for a year to have a lower interest rate?",
+    # Overmind built-in policies
+    input_policies=['anonymize_pii'],
+    output_policies=['reject_irrelevant_answer'],
 )
 
 response.summary()
@@ -74,29 +76,34 @@ output_llm_judge_criteria = {
     }
 }
 
-messages = [
+input_messages = [
     {
         "role": "user", 
         "content": "Hi my name is Jon, account number 20194812. Should I switch my mortgage now or wait for a year to have a lower interest rate?"
     }
 ]
 
-# Use existing OpenAI client methods but now you can pass your policies
-response = overmind.openai.chat.completions.create(
-    model='gpt-4o-mini',
-    messages=messages,
+result = overmind.openai.responses.create(
+    model='gpt-5-mini',
+    input=input_messages,
     input_policies=[input_pii_policy],
     output_policies=[output_llm_judge_criteria]
 )
 
-response.summary()
+result.summary()
 ```
+### Use Overmind Layers
+
+For more complex use cases you can choose Overmind Layers - an API to call standalone policies without relying on us to call LLMs. 
+
+This use case is best demonstrated in our [LangGraph integration tutorial](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Layers%20%26%20LangGraph%20tutorial.ipynb), although the Layers can be used with any framework.
+
 ## Further usage
 
-There is a more detailed [tutorial notebook](https://github.com/overmind-core/overmind-python/blob/main/docs/overmind_tutorial.ipynb) available.
+There are a more detailed tutorials available for [Overmind Proxy](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Proxy%20tutorial.ipynb) and [Overmind Layers & LangGraph integration](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Layers%20%26%20LangGraph%20tutorial.ipynb).
 
 We are not storing your API keys and you are solely responsible for managing them and the associated costs.
 
-On ours side we run policy executions for free as this is an alpha stage product. We may impose usage limits and scale our services up and down from time to time.
+On our side we run policy executions for free as this is an alpha stage product. We may impose usage limits and scale our services up and down from time to time.
 
 We appreciate any feedback, collaboration or other suggestions. You can reach out at [support@evallab.dev](mailto:support@evallab.dev)
