@@ -6,6 +6,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from langgraph.graph import StateGraph
 from typing import Optional
+import hashlib
+import json
 from overmind.utils.api_settings import get_api_settings
 from overmind.utils.serializers import serialize
 
@@ -13,7 +15,9 @@ from overmind.utils.serializers import serialize
 class OvermindObservabilityCallback(BaseCallbackHandler):
     def __init__(
         self,
-        graph: StateGraph | None = None,
+        graph: Optional[StateGraph] = None,
+        name: Optional[str] = '',
+        tags: Optional[dict] = {},
         overmind_api_key: Optional[str] = None,
         traces_base_url: Optional[str] = None,
         debug: bool = False,
@@ -31,6 +35,8 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
 
         self.run_spans = {}
         self.graph = graph.get_graph() if graph else None
+        self.name = name
+        self.tags = tags
 
     def parse_graph(self, graph: StateGraph):
         return {
@@ -76,6 +82,13 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
 
             if self.graph:
                 metadata["graph"] = self.parse_graph(self.graph)
+                graph_hash = hashlib.sha256(
+                    json.dumps(metadata["graph"], sort_keys=True).encode('utf-8')
+                ).hexdigest()
+
+                self.run_spans[run_id].set_attribute("workflow_name", self.name)
+                self.run_spans[run_id].set_attribute("workflow_hash", graph_hash)
+                self.run_spans[run_id].set_attribute("workflow_tags", serialize(self.tags) if isinstance(self.tags, dict) else '{}')
 
         else:
             parent_context = trace.set_span_in_context(
