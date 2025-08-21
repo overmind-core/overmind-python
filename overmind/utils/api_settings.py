@@ -19,12 +19,12 @@ def get_api_settings(
     if base_url is None:
         base_url = os.getenv("OVERMIND_API_URL")
         if base_url is None:
-            base_url = "https://api.evallab.dev"
+            base_url = "https://api.overmindlab.ai"
 
     if traces_base_url is None:
         traces_base_url = os.getenv("OVERMIND_TRACES_URL")
         if traces_base_url is None:
-            traces_base_url = "https://traces.evallab.dev"
+            traces_base_url = "https://traces.overmindlab.ai"
 
     base_url = base_url.rstrip("/")
 
