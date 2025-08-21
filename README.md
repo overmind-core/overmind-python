@@ -24,7 +24,7 @@ pip install overmind
 
 ### Use Overmind Proxy
 
-Get your free Overmind API key at [overmind.evallab.dev](https://overmind.evallab.dev)
+Get your free Overmind API key at [console.overmindlab.ai](https://console.overmindlab.ai)
 
 Below we initialise the Overmind client and call GPT-5-mini with `anonymize_pii` and `reject_irrelevant_answer` policies. This will prevent PII data leakage and ensure only relevant answers are produced.
 ```python
@@ -32,7 +32,7 @@ import os
 from overmind.client import OvermindClient
 
 # Set env variables (or pass directly to the client)
-# Get your free overmind API key at overmind.evallab.dev
+# Get your free overmind API key at console.overmindlab.ai
 os.environ["OVERMIND_API_KEY"] = "your_overmind_api_key"
 os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
 
