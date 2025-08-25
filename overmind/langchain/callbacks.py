@@ -82,13 +82,9 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
 
             if self.graph:
                 metadata["graph"] = self.parse_graph(self.graph)
-                graph_hash = hashlib.sha256(
+                self.graph_hash = hashlib.sha256(
                     json.dumps(metadata["graph"], sort_keys=True).encode('utf-8')
                 ).hexdigest()
-
-                self.run_spans[run_id].set_attribute("workflow_name", self.name)
-                self.run_spans[run_id].set_attribute("workflow_hash", graph_hash)
-                self.run_spans[run_id].set_attribute("workflow_tags", serialize(self.tags) if isinstance(self.tags, dict) else '{}')
 
         else:
             parent_context = trace.set_span_in_context(
@@ -98,6 +94,11 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
                 name=name,
                 context=parent_context,
             )
+
+        if self.graph:
+            self.run_spans[run_id].set_attribute("workflow_name", self.name)
+            self.run_spans[run_id].set_attribute("workflow_hash", self.graph_hash)
+            self.run_spans[run_id].set_attribute("workflow_tags", serialize(self.tags) if isinstance(self.tags, dict) else '{}')
 
         self.run_spans[run_id].set_attribute("metadata", serialize(metadata))
         self.run_spans[run_id].set_attribute("inputs", serialize(inputs))
