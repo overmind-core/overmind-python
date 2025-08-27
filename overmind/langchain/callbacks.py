@@ -113,6 +113,8 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
             self.run_spans[run_id].set_attribute(
                 "policy_results", serialize(outputs.pop("policy_results"))
             )
+
+        if "span_context" in outputs:
             # can't add links to the span that has been started and there is no clean way to pass
             # this span to the backend at the layer run time (since it happening in a downstream node)
             self.run_spans[run_id].set_attribute(
