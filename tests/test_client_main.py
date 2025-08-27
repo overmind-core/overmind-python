@@ -62,6 +62,7 @@ class TestOvermindClient:
             "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
+            "span_context": {},
         }
         mock_response.content = (
             b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
@@ -133,6 +134,7 @@ class TestOvermindClient:
             "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
+            "span_context": {},
         }
         mock_response.content = (
             b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
@@ -162,6 +164,7 @@ class TestOvermindClient:
             "output_layer_results": {},
             "processed_input": "test input",
             "processed_output": "test output",
+            "span_context": {},
         }
         mock_response.content = (
             b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
