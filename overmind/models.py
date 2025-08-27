@@ -154,6 +154,7 @@ class ProxyRunResponse(ReadableBaseModel):
     output_layer_results: Dict[str, Any]
     processed_output: Any
     processed_input: Any
+    span_context: Dict[str, Any]
 
     def summary(self) -> None:
         summarize_proxy_run(self)
