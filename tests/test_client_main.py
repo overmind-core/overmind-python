@@ -31,7 +31,7 @@ class TestOvermindClient:
         assert self.client.overmind_api_key == "test_token"
         assert self.client.base_url == "http://test.com"
         assert self.client.provider_parameters == {"openai_api_key": "test_openai_key"}
-        assert "Authorization" in self.client.session.headers
+        assert "X-API-Token" in self.client.session.headers
         assert "Content-Type" in self.client.session.headers
 
         # Test sub-clients are initialized
