@@ -115,7 +115,7 @@ class OvermindClient:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {self.overmind_api_key}",
+                "X-API-Token": self.overmind_api_key,
                 "Content-Type": "application/json",
             }
         )
@@ -237,13 +237,13 @@ class OvermindLayersClient:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {self.overmind_api_key}",
+                "X-API-Token": self.overmind_api_key,
                 "Content-Type": "application/json",
             }
         )
 
     def run_layer(
-        self, input_data: str, policies: Sequence[str | dict]
+        self, input_data: str, policies: Sequence[str | dict], layer_position: str
     ) -> LayerResponse:
         """
         Run a layer of the Overmind API.
@@ -251,6 +251,7 @@ class OvermindLayersClient:
         payload = {
             "input_data": input_data,
             "policies": policies,
+            "layer_position": layer_position,
         }
 
         response_data = self.session.request(

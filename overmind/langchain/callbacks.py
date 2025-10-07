@@ -49,7 +49,7 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
 
         exporter = OTLPSpanExporter(
             endpoint=f"{self.traces_base_url}/api/v1/traces/create",
-            headers={"Authorization": f"Bearer {self.overmind_api_key}"},
+            headers={"X-API-Token": self.overmind_api_key},
         )
 
         provider.add_span_processor(BatchSpanProcessor(exporter))
