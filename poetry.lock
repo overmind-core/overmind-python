@@ -1826,4 +1826,4 @@ full = ["opentelemetry-instrumentation-httpx", "opentelemetry-instrumentation-lo
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "67e36753f9cf8224730b6c289712c1ded13a66874613a02ee20e886f8f6c0b04"
+content-hash = "27ed131f0656de493cdde0ae0757626262e67b9faa65861005c17edc5cc4eaf4"

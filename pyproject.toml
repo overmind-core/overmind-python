@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overmind"
-version = "0.1.16"
+version = "0.1.17"
 description = "Python client for Overmind API"
 authors = ["Overmind Ltd"]
 readme = "README.md"
@@ -32,8 +32,8 @@ langgraph = "^0.5.4"
 opentelemetry-exporter-otlp-proto-http = "^1.35.0"
 opentelemetry-instrumentation-fastapi = "^0.60b1"
 # Dependencies for vendored opentelemetry-instrumentation-openai (patched)
-opentelemetry-instrumentation = ">=0.59b0"
-opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-instrumentation = ">=0.60b1"
+opentelemetry-semantic-conventions = ">=0.60b1"
 opentelemetry-semantic-conventions-ai = "^0.4.13"
 wrapt = "^1.14.0"
 typing-extensions = "^4.0.0"
