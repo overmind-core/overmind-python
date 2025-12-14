@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">= 3.9"
+python = ">=3.9,<4"
 requests = "^2.31.0"
 pydantic = "^2.0.0"
 rich = "^14.0.0"
@@ -30,10 +30,31 @@ opentelemetry-api = "^1.35.0"
 opentelemetry-sdk = "^1.35.0"
 langgraph = "^0.5.4"
 opentelemetry-exporter-otlp-proto-http = "^1.35.0"
+opentelemetry-instrumentation-fastapi = "^0.60b1"
+# Dependencies for vendored opentelemetry-instrumentation-openai (patched)
+opentelemetry-instrumentation = ">=0.59b0"
+opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-semantic-conventions-ai = "^0.4.13"
+wrapt = "^1.14.0"
+typing-extensions = "^4.0.0"
+packaging = "^23.0"
+# Optional: additional instrumentations for richer traces
+opentelemetry-instrumentation-requests = "^0.60b1"
+opentelemetry-instrumentation-httpx = "^0.60b1"
+opentelemetry-instrumentation-logging = "^0.60b1"
+
+[tool.poetry.extras]
+full = [
+    "opentelemetry-instrumentation-requests",
+    "opentelemetry-instrumentation-httpx", 
+    "opentelemetry-instrumentation-logging",
+]
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0.0"
 ruff = "^0.4.4"
+fastapi = "*"
 
 [build-system]
 requires = ["poetry-core"]
