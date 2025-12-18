@@ -25,22 +25,10 @@ class AnonymizePIILayer(GenericOvermindLayer):
 
     def __init__(
         self,
-        pii_types: list[str] | None = None,
+        pii_types: dict[str, str] | None = None,
         layer_position: str = "input",
         layers_client: OvermindLayersClient | None = None,
     ):
-        if pii_types is None:
-            pii_types = [
-                "DEMOGRAPHIC_DATA",
-                "FINANCIAL_ID",
-                "GEOGRAPHIC_DATA",
-                "GOVERNMENT_ID",
-                "MEDICAL_DATA",
-                "SECURITY_DATA",
-                "TECHNICAL_ID",
-                "PERSON_NAME",
-            ]
-
         policies = [
             {
                 "policy_template": "anonymize_pii",
