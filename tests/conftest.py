@@ -29,20 +29,6 @@ def mock_response():
 
 
 @pytest.fixture
-def mock_agent_response():
-    """Create a mock response for agent operations."""
-    response = Mock()
-    response.status_code = 200
-    response.json.return_value = {
-        "agent_id": "test_agent",
-        "agent_model": "gpt-4o",
-        "agent_description": "Test agent",
-    }
-    response.content = b'{"agent_id": "test_agent"}'
-    return response
-
-
-@pytest.fixture
 def mock_policy_response():
     """Create a mock response for policy operations."""
     response = Mock()

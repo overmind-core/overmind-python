@@ -40,23 +40,6 @@ class TestClientIntegration:
         """Test a complete workflow using all client components."""
         # Mock responses for different operations
         mock_request.side_effect = [
-            # Create agent response
-            Mock(
-                status_code=200,
-                json=lambda: {
-                    "agent_id": "test_agent",
-                    "agent_model": "gpt-4o",
-                    "agent_description": "Test agent",
-                    "input_policies": [],
-                    "output_policies": [],
-                    "stats": {},
-                    "parameters": {},
-                    "business_id": "test_business",
-                    "created_at": "2023-01-01T00:00:00Z",
-                    "updated_at": "2023-01-01T00:00:00Z",
-                },
-                content=b'{"agent_id": "test_agent"}',
-            ),
             # Create policy response
             Mock(
                 status_code=200,
@@ -109,13 +92,12 @@ class TestClientIntegration:
                 "model": "gpt-4o",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            agent_id="test_agent",
         )
         assert result.llm_client_response["choices"][0]["message"]["content"] == "Hello"
         assert result.processed_input == "test input"
 
         # Verify all expected requests were made
-        assert mock_request.call_count == 3
+        assert mock_request.call_count == 2
 
 
 if __name__ == "__main__":
