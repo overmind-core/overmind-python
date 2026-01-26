@@ -83,3 +83,23 @@ class LLMJudgeScorerLayer(GenericOvermindLayer):
             }
         ]
         super().__init__(policies, layer_position, layers_client)
+
+
+class LLMJudgeScorerLayerQA(GenericOvermindLayer):
+    """
+    Judge the LLM's response according to a list of criteria. Each criterion should evaluate to true or false.
+    """
+
+    def __init__(
+        self,
+        criteria: list[str],
+        layer_position: str = "output",
+        layers_client: OvermindLayersClient | None = None,
+    ):
+        policies = [
+            {
+                "policy_template": "reject_llm_judge_with_criteria_and_question",
+                "parameters": {"criteria": criteria},
+            }
+        ]
+        super().__init__(policies, layer_position, layers_client)
