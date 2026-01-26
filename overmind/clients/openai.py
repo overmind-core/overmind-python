@@ -260,12 +260,5 @@ class AsyncOpenAI(__openai.AsyncOpenAI):
     ):
         super().__init__(**kwargs)
         self.overmind_client = OvermindClient(overmind_api_key, overmind_base_url)
-        self._client.build_request = self.build_request_decorator(
-            self._client.build_request
-        )
-        self._client.event_hooks = {
-            "request": [self.log_request],
-            "response": [self.log_response],
-        }
         logger.warning("overmind AsyncOpenAI is not ready with tracing and layers yet")
 
