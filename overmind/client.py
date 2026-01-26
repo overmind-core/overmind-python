@@ -11,7 +11,6 @@ import requests
 
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
 from .models import LayerResponse
-from .agents import AgentsClient
 from .policies import PoliciesClient
 from .utils.api_settings import get_api_settings
 from .utils.serializers import serialize
@@ -121,7 +120,6 @@ class OvermindClient:
         )
 
         # Initialize sub-clients
-        self.agents = AgentsClient(self)
         self.policies = PoliciesClient(self)
 
         # Cache for provider proxies
