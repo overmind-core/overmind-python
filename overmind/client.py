@@ -74,7 +74,6 @@ class OvermindClient:
 
     This client provides:
     - Dynamic provider access (e.g., client.openai.chat.completions.create)
-    - Agent management via client.agents.{methods}
     - Policy management via client.policies.{methods}
     """
 

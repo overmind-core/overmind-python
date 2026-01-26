@@ -35,7 +35,6 @@ class TestOvermindClient:
         assert "Content-Type" in self.client.session.headers
 
         # Test sub-clients are initialized
-        assert hasattr(self.client, "agents")
         assert hasattr(self.client, "policies")
 
     def test_dynamic_provider_access(self):

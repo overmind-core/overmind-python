@@ -28,7 +28,6 @@ class TestClientIntegration:
 
     def test_client_has_all_subclients(self):
         """Test that the client has all expected subclients."""
-        assert hasattr(self.client, "agents")
         assert hasattr(self.client, "policies")
 
     def test_client_has_dynamic_provider_access(self):
@@ -90,15 +89,6 @@ class TestClientIntegration:
                 content=b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}',
             ),
         ]
-
-        # Create an agent
-        agent = self.client.agents.create(
-            agent_id="test_agent",
-            agent_model="gpt-4o",
-            agent_description="Test agent",
-        )
-        # Create methods return success response, not the created object
-        assert agent is not None
 
         # Create a policy
         policy = self.client.policies.create(
