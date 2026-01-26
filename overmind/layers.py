@@ -9,13 +9,15 @@ class GenericOvermindLayer:
         policies: Sequence[str | dict],
         layer_position: str,
         layers_client: OvermindLayersClient | None = None,
+        **kwargs,
     ):
         self.layers_client = layers_client or get_layers_client()
         self.policies = policies
         self.layer_position = layer_position
 
-    def run(self, input_data: str) -> LayerResponse:
-        return self.layers_client.run_layer(input_data, self.policies, self.layer_position)
+    def run(self, input_data: str, **kwargs) -> LayerResponse:
+        print(f"running layer {self.policies} with input {input_data}")
+        return self.layers_client.run_layer(input_data, self.policies, self.layer_position, **kwargs)
 
 
 class AnonymizePIILayer(GenericOvermindLayer):
@@ -28,6 +30,7 @@ class AnonymizePIILayer(GenericOvermindLayer):
         pii_types: dict[str, str] | None = None,
         layer_position: str = "input",
         layers_client: OvermindLayersClient | None = None,
+        **kwargs,
     ):
         policies = [
             {
@@ -48,6 +51,7 @@ class RejectPromptInjectionLayer(GenericOvermindLayer):
         self,
         layer_position: str = "input",
         layers_client: OvermindLayersClient | None = None,
+        **kwargs,
     ):
         super().__init__(["reject_prompt_injection"], layer_position, layers_client)
 
@@ -61,6 +65,7 @@ class RejectIrrelevantAnswersLayer(GenericOvermindLayer):
         self,
         layer_position: str = "output",
         layers_client: OvermindLayersClient | None = None,
+        **kwargs,
     ):
         super().__init__(["reject_irrelevant_answer"], layer_position, layers_client)
 
@@ -75,6 +80,7 @@ class LLMJudgeScorerLayer(GenericOvermindLayer):
         criteria: list[str],
         layer_position: str = "output",
         layers_client: OvermindLayersClient | None = None,
+        **kwargs,
     ):
         policies = [
             {
