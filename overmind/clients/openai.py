@@ -142,7 +142,9 @@ class BaseHandler(ABC):
     ):
         for policy in input_policies:
             res = self.overmind_client.run_layer(policy=policy, input_data=inputs[-1])
-            inputs[-1] = res.processed_data or inputs[-1] # if the policy returns None, keep the original input
+            inputs[-1] = (
+                res.processed_data or inputs[-1]
+            )  # if the policy returns None, keep the original input
         return inputs
 
     @abstractmethod
@@ -226,6 +228,7 @@ class responsesHandler(BaseHandler):
     ):
         pass
 
+
 class doNothingHandler(BaseHandler):
     path = None
 
@@ -235,8 +238,11 @@ class doNothingHandler(BaseHandler):
     def post_request(self, request: Request, kwargs: dict):
         return
 
-    def post_response(self, response: Response, json_output: dict, output_policies: list[Any]):
+    def post_response(
+        self, response: Response, json_output: dict, output_policies: list[Any]
+    ):
         return
+
 
 class audioSpeechHandler(doNothingHandler):
     path = "/v1/audio/speech"
@@ -244,8 +250,6 @@ class audioSpeechHandler(doNothingHandler):
 
 class responsesCompactHandler(doNothingHandler):
     path = "/v1/responses/compact"
-
-
 
 
 class AsyncOpenAI(__openai.AsyncOpenAI):
@@ -259,4 +263,3 @@ class AsyncOpenAI(__openai.AsyncOpenAI):
         super().__init__(**kwargs)
         self.overmind_client = OvermindClient(overmind_api_key, overmind_base_url)
         logger.warning("overmind AsyncOpenAI is not ready with tracing and layers yet")
-
