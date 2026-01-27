@@ -221,7 +221,11 @@ class responsesHandler(BaseHandler):
         return kwargs
 
     def post_request(self, request: Request, kwargs: dict):
-        return
+        setattr(
+            request,
+            "kwargs",
+            {"question": kwargs["json"]["input"]},
+        )
 
     def post_response(
         self, response: Response, json_output: dict, output_policies: list[Any]
