@@ -75,7 +75,8 @@ class OpenAI(__openai.OpenAI):
 
             url: URL = kwargs.get("url")
             handler = self._get_handler(url.path)
-            if handler is not None:
+            # TODO: add stram handler here
+            if handler and not json_content.get("stream", False):
                 kwargs = handler.pre_request(
                     kwargs=kwargs,
                     json_content=json_content,
@@ -194,14 +195,11 @@ class chatCompletionHandler(BaseHandler):
     ):
         content = json_output["choices"][0]["message"]["content"]
 
-        if getattr(response, "is_telemetry_traced", False):
-            setattr(response, "is_telemetry_traced", True)
-
-            with get_tracer().start_as_current_span("llm_response") as span:
-                span.set_attribute("output", str(content))
+        with get_tracer().start_as_current_span("llm_run") as span:
+            span.set_attribute("output", str(content))
 
         for policy in output_policies:
-            res = self.overmind_client.run_layer(
+            self.overmind_client.run_layer(
                 policy=policy,
                 input_data=content,
                 **getattr(response._request, "kwargs", {}),
