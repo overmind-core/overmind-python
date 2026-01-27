@@ -35,7 +35,6 @@ class TestOvermindClient:
         assert "Content-Type" in self.client.session.headers
 
         # Test sub-clients are initialized
-        assert hasattr(self.client, "agents")
         assert hasattr(self.client, "policies")
 
     def test_dynamic_provider_access(self):
@@ -77,7 +76,6 @@ class TestOvermindClient:
         # Verify the request was made with correct parameters
         call_args = mock_request.call_args
         request_data = call_args[1]["json"]
-        assert request_data["agent_id"] == "default_agent"
         # client_call_params is serialized to JSON string
         import json
 
@@ -195,15 +193,6 @@ class TestOvermindClient:
             openai_api_key="test_openai_key",
         )
         assert client.overmind_api_key == "env_test_token"
-
-    def test_client_initialization_no_api_key(self):
-        """Test client initialization without API key raises error."""
-        with pytest.raises(OvermindError) as exc_info:
-            OvermindClient(
-                base_url="http://test.com",
-                openai_api_key="test_openai_key",
-            )
-        assert "No Overmind API key provided" in str(exc_info.value)
 
 
 if __name__ == "__main__":

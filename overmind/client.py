@@ -11,7 +11,6 @@ import requests
 
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
 from .models import LayerResponse
-from .agents import AgentsClient
 from .policies import PoliciesClient
 from .utils.api_settings import get_api_settings
 from .utils.serializers import serialize
@@ -57,7 +56,6 @@ class ClientPathProxy:
 
         input_policies = kwargs.pop("input_policies", None)
         output_policies = kwargs.pop("output_policies", None)
-        agent_id = kwargs.pop("agent_id", "default_agent")
 
         # Invoke the provider through the Overmind API
         return self.client.invoke(
@@ -65,7 +63,6 @@ class ClientPathProxy:
             client_call_params=serialize(kwargs),
             input_policies=input_policies,
             output_policies=output_policies,
-            agent_id=agent_id,
         )
 
 
@@ -75,7 +72,6 @@ class OvermindClient:
 
     This client provides:
     - Dynamic provider access (e.g., client.openai.chat.completions.create)
-    - Agent management via client.agents.{methods}
     - Policy management via client.policies.{methods}
     """
 
@@ -121,7 +117,6 @@ class OvermindClient:
         )
 
         # Initialize sub-clients
-        self.agents = AgentsClient(self)
         self.policies = PoliciesClient(self)
 
         # Cache for provider proxies
@@ -198,7 +193,6 @@ class OvermindClient:
         Args:
             client_path: Provider path (e.g., "openai.chat.completions.create")
             client_call_params: Parameters for the provider call
-            agent_id: Agent ID to use for the invocation
             client_init_params: Parameters for provider client initialization (overrides stored parameters)
             input_policies: Input policies to apply
             output_policies: Output policies to apply
@@ -210,7 +204,6 @@ class OvermindClient:
         init_params = client_init_params or self.provider_parameters
 
         payload = {
-            "agent_id": agent_id,
             "client_call_params": client_call_params,
             "client_init_params": init_params,
             "input_policies": input_policies,
