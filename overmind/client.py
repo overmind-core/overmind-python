@@ -236,7 +236,7 @@ class OvermindLayersClient:
         )
 
     def run_layer(
-        self, input_data: str, policies: Sequence[str | dict], layer_position: str
+        self, input_data: str, policies: Sequence[str | dict], layer_position: str, **kwargs
     ) -> LayerResponse:
         """
         Run a layer of the Overmind API.
@@ -245,6 +245,7 @@ class OvermindLayersClient:
             "input_data": input_data,
             "policies": policies,
             "layer_position": layer_position,
+            "kwargs": kwargs,
         }
 
         response_data = self.session.request(
