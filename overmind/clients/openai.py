@@ -6,7 +6,6 @@ import logging
 from httpx import Request, Response, URL
 
 from overmind.clients.overmind_client import OvermindClient
-from overmind.overmind_sdk import get_tracer
 
 try:
     import openai as __openai
@@ -16,7 +15,6 @@ except ImportError:
     )
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class OpenAI(__openai.OpenAI):
@@ -24,8 +22,10 @@ class OpenAI(__openai.OpenAI):
     def __init__(
         self,
         *,
-        overmind_api_key: str,
+        overmind_api_key: Optional[str] = None,
+        # internal client will use OVERMIND_API_KEY env var
         overmind_base_url: Optional[str] = None,
+        # internal client will use OVERMIND_API_URL env var
         # a set of global policies that will be applied to all requests
         input_policies: List[str] = [],
         # a set of global policies that will be applied to all responses
@@ -195,11 +195,11 @@ class chatCompletionHandler(BaseHandler):
     def post_response(
         self, response: Response, json_output: dict, output_policies: list[Any]
     ):
-        content = json_output["choices"][0]["message"]["content"]
+        content = json_output["choices"][0]["message"].get("content", "")
+        tool_calls = json_output["choices"][0]["message"].get("tool_calls", [])
 
-        with get_tracer().start_as_current_span("llm_run") as span:
-            span.set_attribute("output", str(content))
-
+        if not content:
+            return
         for policy in output_policies:
             self.overmind_client.run_layer(
                 policy=policy,

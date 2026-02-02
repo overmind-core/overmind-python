@@ -1,13 +1,18 @@
 import os
 import logging
+from typing import Optional
 from overmind import layers
+from overmind.overmind_sdk import init, get_tracer
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class OvermindClient:
-    def __init__(self, overmind_api_key: str, overmind_base_url: str = None):
+    def __init__(
+        self,
+        overmind_api_key: Optional[str] = None,
+        overmind_base_url: Optional[str] = None,
+    ):
         self.overmind_api_key = overmind_api_key or os.getenv(
             "OVERMIND_API_KEY",
         )
@@ -17,6 +22,8 @@ class OvermindClient:
         self.overmind_base_url = overmind_base_url or os.getenv(
             "OVERMIND_API_URL",
         )
+
+        init(overmind_api_key)
 
         logger.debug("OVERMIND_API_URL is set to: %s", self.overmind_base_url)
 
@@ -30,7 +37,14 @@ class OvermindClient:
 
     def run_layer(self, *, policy, input_data, **kwargs):
         layer = get_layer(policy, **kwargs)
-        return layer.run(input_data=input_data, **kwargs)
+        with get_tracer().start_as_current_span(f"execute_policy_{policy}") as span:
+            response = layer.run(input_data=input_data, **kwargs)
+            span.set_attribute("inputs", str(input_data))
+            span.set_attribute("outputs", str(response.processed_data))
+            span.set_attribute("policy_outcome", response.overall_policy_outcome)
+            span.set_attribute("policy_results", str(response.policy_results))
+
+        return response
 
 
 def get_layer(name: str, **kwargs) -> layers.GenericOvermindLayer:

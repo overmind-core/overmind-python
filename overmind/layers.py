@@ -16,7 +16,6 @@ class GenericOvermindLayer:
         self.layer_position = layer_position
 
     def run(self, input_data: str, **kwargs) -> LayerResponse:
-        print(f"running layer {self.policies} with input {input_data}")
         return self.layers_client.run_layer(input_data, self.policies, self.layer_position, **kwargs)
 
 
