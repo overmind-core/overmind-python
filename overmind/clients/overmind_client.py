@@ -27,14 +27,6 @@ class OvermindClient:
 
         logger.debug("OVERMIND_API_URL is set to: %s", self.overmind_base_url)
 
-    def summary(self, *args, **kwargs): ...
-
-    def _make_request(self, *args, **kwargs): ...
-
-    def create_agent(self, *args, **kwargs): ...
-
-    def create_policy(self, *args, **kwargs): ...
-
     def run_layer(self, *, policy, input_data, **kwargs):
         layer = get_layer(policy, **kwargs)
         with get_tracer().start_as_current_span(f"execute_policy_{policy}") as span:

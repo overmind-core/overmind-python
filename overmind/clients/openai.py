@@ -96,6 +96,10 @@ class OpenAI(__openai.OpenAI):
         return wrapper
 
     def run_output_policies(self, response: Response):
+        def summary():
+            raise NotImplementedError("method not implemented yet")
+
+        setattr(response, "summary", summary)
         # return
         if response.status_code != 200:
             return
@@ -118,9 +122,6 @@ class OpenAI(__openai.OpenAI):
                 json_output=json_output,
                 output_policies=output_policies,
             )
-
-    def summary(self):
-        raise NotImplementedError("method not implemented yet")
 
 
 @dataclass
