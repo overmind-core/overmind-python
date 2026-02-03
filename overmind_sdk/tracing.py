@@ -1,10 +1,12 @@
 import logging
 import os
 from opentelemetry import trace
+from opentelemetry.context import get_value
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
+from opentelemetry.semconv_ai import SpanAttributes
 import importlib.metadata
 import importlib.util
 
@@ -126,6 +128,11 @@ def enable_tracing(providers: list[str]):
         enable_google_genai()
 
 
+def _span_processor_on_start(span: trace.Span, parent_context: trace.Context | None = None):
+    if value := get_value("workflow_name"):
+        span.set_attribute(SpanAttributes.TRACELOOP_WORKFLOW_NAME, str(value))
+
+
 def init(
     overmind_api_key: str | None = None,
     *,
@@ -175,15 +182,13 @@ def init(
     endpoint = f"{overmind_base_url}/api/v1/traces"
 
     # Configure OpenTelemetry Provider with rich resource attributes
-    resource = Resource.create(
-        {
-            "service.name": service_name,
-            "service.version": os.environ.get("SERVICE_VERSION", "unknown"),
-            "deployment.environment": environment,
-            "overmind.sdk.name": "overmind-python",
-            "overmind.sdk.version": _SDK_VERSION,
-        }
-    )
+    resource = Resource.create({
+        "service.name": service_name,
+        "service.version": os.environ.get("SERVICE_VERSION", "unknown"),
+        "deployment.environment": environment,
+        "overmind.sdk.name": "overmind-python",
+        "overmind.sdk.version": _SDK_VERSION,
+    })
 
     provider = TracerProvider(resource=resource)
 
@@ -193,6 +198,7 @@ def init(
     otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
     span_processor = BatchSpanProcessor(otlp_exporter)
     provider.add_span_processor(span_processor)
+    span_processor.on_start = _span_processor_on_start
 
     # Set global Trace Provider
     trace.set_tracer_provider(provider)
@@ -202,11 +208,7 @@ def init(
     enable_tracing(providers)
 
     _initialized = True
-    logger.info(
-        "Overmind SDK initialized: service=%s, environment=%s",
-        service_name,
-        environment,
-    )
+    logger.info("Overmind SDK initialized: service=%s, environment=%s", service_name, environment)
 
 
 def get_tracer() -> trace.Tracer:
