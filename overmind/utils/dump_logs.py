@@ -6,6 +6,7 @@ from tqdm import tqdm
 from opentelemetry import trace
 from typing import Dict, Optional, TypeVar
 from pydantic import BaseModel, ConfigDict, Field
+import csv
 
 
 def get_log_item_model(item: dict, mapping: Dict[str, str] = {}):
@@ -56,10 +57,8 @@ def get_log_item_model(item: dict, mapping: Dict[str, str] = {}):
     return LogItem
 
 
-LogItem = TypeVar("LogItem", bound=BaseModel)
-
-
-def process_log_item(log_item: "LogItem"):
+def process_log_item(item: dict, mapping: Dict[str, str]):
+    log_item = get_log_item_model(item, mapping)
     context = trace.set_span_in_context(
         trace.NonRecordingSpan(
             trace.SpanContext(
@@ -84,40 +83,34 @@ def process_log_item(log_item: "LogItem"):
         span.end(end_time=log_item.end_time)
 
 
-def load_from_jsonl(filepath: str) -> Iterator[LogItem]:
+def load_from_jsonl(filepath: str) -> Iterator[dict]:
     with open(filepath, "r") as f:
         for line in f:
-            item = json.loads(line)
-            yield LogItem(**item)
+            yield json.loads(line)
 
 
-def load_from_json(filepath: str) -> Iterator[LogItem]:
+def load_from_json(filepath: str) -> Iterator[dict]:
     with open(filepath, "r") as f:
         data = json.load(f)
         for item in data:
-            yield LogItem(**item)
+            yield item
 
 
-def load_from_csv(filepath: str) -> Iterator[LogItem]:
-    import csv
-
+def load_from_csv(filepath: str) -> Iterator[dict]:
     with open(filepath, "r", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            # Assuming LogItem can be instantiated from a dict
-            yield LogItem(**row)
+            yield row
 
 
 def ingest_logs(filepath: str, mapping: Dict[str, str], **kwargs):
-    LogItem = get_log_item_model(mapping)
-
     if kwargs.get("overmind_api_key"):
         init(overmind_api_key=kwargs.get("overmind_api_key"))
     else:
         init()
 
     suffix = Path(filepath).suffix
-    items = []
+    items: list[dict] = []
     if suffix == ".jsonl":
         items = load_from_jsonl(filepath)
     elif suffix == ".json":
@@ -127,9 +120,9 @@ def ingest_logs(filepath: str, mapping: Dict[str, str], **kwargs):
     else:
         raise ValueError(f"Unsupported file extension: {suffix}")
 
-    for i, log_item in tqdm(enumerate(items)):
+    for i, dict_item in tqdm(enumerate(items)):
         try:
-            process_log_item(log_item)
+            process_log_item(dict_item, mapping)
         except Exception as trace_ex:
             print(f"Failed to record span for line {i}: {trace_ex}")
             continue
