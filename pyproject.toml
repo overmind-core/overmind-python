@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overmind"
-version = "0.1.20"
+version = "0.1.21"
 description = "Python client for Overmind API"
 authors = ["Overmind Ltd"]
 readme = "README.md"
@@ -41,6 +41,7 @@ packaging = "^23.0"
 opentelemetry-instrumentation-requests = "^0.60b1"
 opentelemetry-instrumentation-httpx = "^0.60b1"
 opentelemetry-instrumentation-logging = "^0.60b1"
+tqdm = "^4.67.3"
 
 [tool.poetry.extras]
 full = [
