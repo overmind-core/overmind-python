@@ -41,6 +41,7 @@ packaging = "^23.0"
 opentelemetry-instrumentation-requests = "^0.60b1"
 opentelemetry-instrumentation-httpx = "^0.60b1"
 opentelemetry-instrumentation-logging = "^0.60b1"
+tqdm = "^4.67.3"
 
 [tool.poetry.extras]
 full = [
