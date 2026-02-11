@@ -8,6 +8,7 @@ with policy enforcement and automatic observability.
 from .client import OvermindClient
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
 from .overmind_sdk import init, get_tracer, set_user, set_tag, capture_exception
+from .tracer import trace_function
 
 __version__ = "0.1.0"
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "set_user",
     "set_tag",
     "capture_exception",
+    "trace_function",
 ]
