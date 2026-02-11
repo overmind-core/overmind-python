@@ -7,8 +7,12 @@ with policy enforcement and automatic observability.
 
 from .client import OvermindClient
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
+
 from .tracing import init, get_tracer, set_user, set_tag, capture_exception
 from opentelemetry.overmind.prompt import PromptString
+
+from .tracer import trace_function
+
 
 __version__ = "0.1.32"
 __all__ = [
@@ -22,4 +26,5 @@ __all__ = [
     "set_tag",
     "capture_exception",
     "PromptString",
+    "trace_function",
 ]
