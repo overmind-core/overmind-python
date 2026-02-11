@@ -24,7 +24,7 @@ def get_api_settings(
     if traces_base_url is None:
         traces_base_url = os.getenv("OVERMIND_TRACES_URL")
         if traces_base_url is None:
-            traces_base_url = "https://traces.overmindlab.ai"
+            traces_base_url = "https://api.overmindlab.ai"
 
     base_url = base_url.rstrip("/")
 
