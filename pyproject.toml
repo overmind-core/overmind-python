@@ -42,6 +42,8 @@ opentelemetry-instrumentation-requests = "^0.60b1"
 opentelemetry-instrumentation-httpx = "^0.60b1"
 opentelemetry-instrumentation-logging = "^0.60b1"
 tqdm = "^4.67.3"
+opentelemetry-instrumentation-anthropic = "^0.52.3"
+opentelemetry-instrumentation-google-generativeai = "^0.52.3"
 
 [tool.poetry.extras]
 full = [
