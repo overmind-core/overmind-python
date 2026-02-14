@@ -637,6 +637,27 @@ packaging = ">=18.0"
 wrapt = ">=1.0.0,<2.0.0"
 
 [[package]]
+name = "opentelemetry-instrumentation-anthropic"
+version = "0.52.3"
+description = "OpenTelemetry Anthropic instrumentation"
+optional = false
+python-versions = "<4,>=3.10"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_anthropic-0.52.3-py3-none-any.whl", hash = "sha256:5b6d3afa7b6c182d65dd53ecabc68b84b3a3c5a98de8440af2106517eebe4e01"},
+    {file = "opentelemetry_instrumentation_anthropic-0.52.3.tar.gz", hash = "sha256:f0868e83f70077f2f3a218a82cc5af602610216c44ca707b34d3a9817cf5b9b1"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.38.0,<2"
+opentelemetry-instrumentation = ">=0.59b0"
+opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
+
+[package.extras]
+instruments = ["anthropic"]
+
+[[package]]
 name = "opentelemetry-instrumentation-asgi"
 version = "0.60b1"
 description = "ASGI instrumentation for OpenTelemetry"
@@ -679,6 +700,27 @@ opentelemetry-util-http = "0.60b1"
 
 [package.extras]
 instruments = ["fastapi (>=0.92,<1.0)"]
+
+[[package]]
+name = "opentelemetry-instrumentation-google-generativeai"
+version = "0.52.3"
+description = "OpenTelemetry Google Generative AI instrumentation"
+optional = false
+python-versions = "<4,>=3.10"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_google_generativeai-0.52.3-py3-none-any.whl", hash = "sha256:3e1f31b356e8e89788b00bc9d780721e9f83a505b81b7dce8572dc488438ca42"},
+    {file = "opentelemetry_instrumentation_google_generativeai-0.52.3.tar.gz", hash = "sha256:e0e029f7b5f70abef911ea1ed2926f73027a1363990ba439481f27b3abf54362"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.38.0,<2"
+opentelemetry-instrumentation = ">=0.59b0"
+opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
+
+[package.extras]
+instruments = ["google-genai"]
 
 [[package]]
 name = "opentelemetry-instrumentation-httpx"
@@ -1949,4 +1991,4 @@ full = ["opentelemetry-instrumentation-httpx", "opentelemetry-instrumentation-lo
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "15e9d7423e08a4ff1edd9e908ebbfb43097f0c72499b15d8ba0f6ae4a92f0524"
+content-hash = "b4239eb9caec2076c8c73cb901f42e2a37d882b6570607dccd7a603e730c1ee1"
