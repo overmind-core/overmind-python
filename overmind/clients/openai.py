@@ -63,6 +63,8 @@ class OpenAI(__openai.OpenAI):
         def wrapper(*args, **kwargs) -> Request:
             # TODO: need to handle all, content, body, and data, and files
             json_content = kwargs.get("json")
+            if not json_content:
+                return func(*args, **kwargs)
             # role = input policy will change the user input
             # output policy will  not change the response but just flags it to the user
             input_policies = (
