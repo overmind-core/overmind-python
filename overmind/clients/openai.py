@@ -27,9 +27,8 @@ class OpenAI(__openai.OpenAI):
         overmind_base_url: Optional[str] = None,
         # internal client will use OVERMIND_API_URL env var
         # a set of global policies that will be applied to all requests
-        input_policies: List[str] = [],
-        # a set of global policies that will be applied to all responses
-        output_policies: List[str] = [],
+        input_policies: Optional[List[str]] = None,
+        output_policies: Optional[List[str]] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -37,8 +36,8 @@ class OpenAI(__openai.OpenAI):
         self._client.build_request = self.build_request_decorator(
             self._client.build_request
         )
-        self.global_input_policies = input_policies
-        self.global_output_policies = output_policies
+        self.global_input_policies = input_policies or []
+        self.global_output_policies = output_policies or []
         self._client.event_hooks = {
             "response": [self.run_output_policies],
         }
