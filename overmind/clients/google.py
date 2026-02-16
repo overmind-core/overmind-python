@@ -4,7 +4,6 @@ import logging
 from overmind.clients.overmind_client import OvermindClient
 
 try:
-    import opentelemetry.instrumentation.anthropic as __anthropic_instrumentation
     import opentelemetry.instrumentation.google_generativeai as __google_instrumentation
     __google_instrumentation.GoogleGenerativeAiInstrumentor().instrument()
     from google import genai
