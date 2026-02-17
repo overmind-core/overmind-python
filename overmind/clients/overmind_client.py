@@ -23,7 +23,7 @@ class OvermindClient:
             "OVERMIND_API_URL",
         )
 
-        init(overmind_api_key)
+        init(overmind_api_key, traces_base_url=self.overmind_base_url)
 
         logger.debug("OVERMIND_API_URL is set to: %s", self.overmind_base_url)
 
