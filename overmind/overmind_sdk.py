@@ -27,33 +27,33 @@ def init(
 ) -> None:
     """
     Initialize the Overmind SDK for automatic monitoring.
-    
+
     Call this once at application startup, before creating your FastAPI app.
-    
+
     Example:
         import overmind
         overmind.init(service_name="my-backend")
-        
+
         from fastapi import FastAPI
         app = FastAPI()
 
     Args:
         overmind_api_key: Your Overmind API key. If not provided, uses OVERMIND_API_KEY env var.
         traces_base_url: Base URL for traces. If not provided, uses OVERMIND_TRACES_URL env var.
-        service_name: Name of your service (appears in traces). Defaults to OVERMIND_SERVICE_NAME 
+        service_name: Name of your service (appears in traces). Defaults to OVERMIND_SERVICE_NAME
                       env var or "unknown-service".
-        environment: Environment name (e.g., "production", "staging"). Defaults to 
+        environment: Environment name (e.g., "production", "staging"). Defaults to
                      OVERMIND_ENVIRONMENT env var or "development".
         processes_sample_rate: Sampling rate for traces (0.0 to 1.0). Default 1.0 captures all.
         capture_request_body: Whether to capture OpenAI request payloads. Default True.
         capture_response_body: Whether to capture OpenAI response payloads. Default True.
     """
     global _initialized, _tracer
-    
+
     if _initialized:
         logger.debug("Overmind SDK already initialized, skipping.")
         return
-    
+
     try:
         api_key, _, traces_url = get_api_settings(
             overmind_api_key=overmind_api_key,
@@ -65,20 +65,20 @@ def init(
 
     # Resolve service name and environment
     resolved_service_name = (
-        service_name 
-        or os.environ.get("OVERMIND_SERVICE_NAME") 
+        service_name
+        or os.environ.get("OVERMIND_SERVICE_NAME")
         or os.environ.get("SERVICE_NAME")
         or "unknown-service"
     )
     resolved_environment = (
-        environment 
-        or os.environ.get("OVERMIND_ENVIRONMENT") 
+        environment
+        or os.environ.get("OVERMIND_ENVIRONMENT")
         or os.environ.get("ENVIRONMENT")
         or "development"
     )
 
     endpoint = f"{traces_url}/api/v1/traces/create"
-    
+
     # Configure OpenTelemetry Provider with rich resource attributes
     resource = Resource.create({
         "service.name": resolved_service_name,
@@ -87,31 +87,21 @@ def init(
         "overmind.sdk.name": "overmind-python",
         "overmind.sdk.version": "0.1.15",
     })
-    
+
     provider = TracerProvider(resource=resource)
-    
+
     # Configure OTLP Exporter
     headers = {"X-API-Token": api_key}
-    
+
     otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
     span_processor = BatchSpanProcessor(otlp_exporter)
     provider.add_span_processor(span_processor)
-    
+
     # Set global Trace Provider
     trace.set_tracer_provider(provider)
-    
+
     # Store tracer for custom spans
     _tracer = trace.get_tracer("overmind", "0.1.15")
-
-    # Instrument FastAPI (for HTTP request tracing)
-    try:
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-        FastAPIInstrumentor().instrument()
-        logger.info("Overmind SDK: FastAPI instrumentation enabled.")
-    except ImportError:
-        logger.debug("Overmind SDK: opentelemetry-instrumentation-fastapi not found, skipping.")
-    except Exception as e:
-        logger.warning(f"Overmind SDK: Failed to instrument FastAPI: {e}")
 
     # Instrument OpenAI (for LLM call tracing) - using vendored patched version
     try:
@@ -122,26 +112,6 @@ def init(
         logger.debug("Overmind SDK: opentelemetry-instrumentation-openai not found, skipping.")
     except Exception as e:
         logger.warning(f"Overmind SDK: Failed to instrument OpenAI: {e}")
-
-    # Instrument requests library (for outgoing HTTP calls)
-    try:
-        from opentelemetry.instrumentation.requests import RequestsInstrumentor
-        RequestsInstrumentor().instrument()
-        logger.info("Overmind SDK: Requests instrumentation enabled.")
-    except ImportError:
-        logger.debug("Overmind SDK: opentelemetry-instrumentation-requests not found, skipping.")
-    except Exception as e:
-        logger.warning(f"Overmind SDK: Failed to instrument Requests: {e}")
-
-    # Instrument httpx (async HTTP client, used by newer OpenAI SDK)
-    try:
-        from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-        HTTPXClientInstrumentor().instrument()
-        logger.info("Overmind SDK: HTTPX instrumentation enabled.")
-    except ImportError:
-        logger.debug("Overmind SDK: opentelemetry-instrumentation-httpx not found, skipping.")
-    except Exception as e:
-        logger.warning(f"Overmind SDK: Failed to instrument HTTPX: {e}")
 
     # Instrument logging (to correlate logs with traces)
     try:
@@ -163,16 +133,16 @@ def init(
 def get_tracer() -> trace.Tracer:
     """
     Get the Overmind tracer for creating custom spans.
-    
+
     Example:
         tracer = overmind.get_tracer()
         with tracer.start_as_current_span("my-operation") as span:
             span.set_attribute("user.id", user_id)
             # ... your code ...
-    
+
     Returns:
         OpenTelemetry Tracer instance.
-        
+
     Raises:
         RuntimeError: If SDK not initialized.
     """
@@ -186,9 +156,9 @@ def get_tracer() -> trace.Tracer:
 def set_user(user_id: str, email: Optional[str] = None, username: Optional[str] = None) -> None:
     """
     Associate current trace with a user (like Sentry's set_user).
-    
+
     Call this in your request handler to tag traces with user info.
-    
+
     Example:
         @app.middleware("http")
         async def add_user_context(request: Request, call_next):
@@ -213,7 +183,7 @@ def set_user(user_id: str, email: Optional[str] = None, username: Optional[str] 
 def set_tag(key: str, value: str) -> None:
     """
     Add a custom tag to the current span.
-    
+
     Example:
         overmind.set_tag("feature.flag", "new-checkout-flow")
         overmind.set_tag("tenant.id", tenant_id)
@@ -230,7 +200,7 @@ def set_tag(key: str, value: str) -> None:
 def capture_exception(exception: Exception) -> None:
     """
     Record an exception on the current span.
-    
+
     Example:
         try:
             risky_operation()
