@@ -30,5 +30,6 @@ def get_api_settings(
         traces_base_url = os.getenv("OVERMIND_TRACES_URL") or default_url
 
     base_url = base_url.rstrip("/")
+    traces_base_url = traces_base_url.rstrip("/")
 
     return overmind_api_key, base_url, traces_base_url
