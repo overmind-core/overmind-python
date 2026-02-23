@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overmind"
-version = "0.1.25"
+version = "0.1.26"
 description = "Python client for Overmind API"
 authors = ["Overmind Ltd"]
 readme = "README.md"
