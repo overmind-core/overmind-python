@@ -64,6 +64,8 @@ class OpenAI(__openai.OpenAI):
         def wrapper(*args, **kwargs) -> Request:
             # TODO: need to handle all, content, body, and data, and files
             json_content = kwargs.get("json")
+            if not json_content:
+                return func(*args, **kwargs)
             # role = input policy will change the user input
             # output policy will  not change the response but just flags it to the user
             input_policies = (
@@ -258,13 +260,29 @@ class responsesCompactHandler(doNothingHandler):
 
 
 class AsyncOpenAI(__openai.AsyncOpenAI):
+    """
+    Async Overmind-wrapped OpenAI client.
+
+    Telemetry (OpenTelemetry traces) is fully captured via the OvermindClient
+    initialisation which instruments the openai library.
+
+    Policy support (input_policies / output_policies) is not yet wired for
+    async – the parameters are accepted and stored so the interface is
+    forward-compatible with the sync OpenAI client.
+    """
+
     def __init__(
         self,
         *,
-        overmind_api_key: str,
+        overmind_api_key: Optional[str] = None,
         overmind_base_url: Optional[str] = None,
+        input_policies: List[str] = [],
+        output_policies: List[str] = [],
         **kwargs,
     ):
         super().__init__(**kwargs)
+        # This triggers overmind.init() which sets up OTel tracing +
+        # instruments the openai module (both sync and async paths).
         self.overmind_client = OvermindClient(overmind_api_key, overmind_base_url)
-        logger.warning("overmind AsyncOpenAI is not ready with tracing and layers yet")
+        self.global_input_policies = input_policies
+        self.global_output_policies = output_policies
