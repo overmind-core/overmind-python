@@ -1,109 +1,137 @@
-# Overmind Client
+# Overmind Python SDK
 
 [![CI Checks](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml/badge.svg)](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/overmind.svg)](https://pypi.org/project/overmind/)
 
-A client for the Overmind API that provides easy access to AI provider endpoints with policy enforcement.
+Drop-in replacement for OpenAI, Anthropic, and Google Gemini clients that automatically traces every LLM call to the [Overmind](https://docs.overmindlab.ai) platform for optimization.
 
-## Features
+## What is Overmind?
 
-- **Easy Integration**: Use major providers like OpenAI with the same call signatures
-- **Policy Enforcement**: Apply customizable policies to your LLM inputs and outputs
-- **Observability**: Log and explore all LLM calls and policy results
+Overmind automatically optimizes your AI agents — better prompts, better models, lower cost. It collects execution traces, evaluates them with LLM judges, and recommends better prompts and models to reduce cost, improve quality, and lower latency.
+
+- **Managed service**: [console.overmindlab.ai](https://console.overmindlab.ai)
+- **Self-hosted (open-source)**: [github.com/overmind-core/overmind](https://github.com/overmind-core/overmind)
+- **Docs**: [docs.overmindlab.ai](https://docs.overmindlab.ai)
 
 ## Installation
-
-
 
 ```bash
 pip install overmind
 ```
 
-
 ## Quick Start
 
-### Use Overmind Proxy
+Swap one import line. Everything else stays the same.
 
-Get your free Overmind API key at [console.overmindlab.ai](https://console.overmindlab.ai)
+**Before:**
+```python
+from openai import OpenAI
+```
 
-Below we initialise the Overmind client and call GPT-5-mini with `anonymize_pii` and `reject_irrelevant_answer` policies. This will prevent PII data leakage and ensure only relevant answers are produced.
+**After:**
+```python
+from overmind.clients import OpenAI
+```
+
+Full example:
+
 ```python
 import os
-from overmind.client import OvermindClient
+from overmind.clients import OpenAI
 
-# Set env variables (or pass directly to the client)
-# Get your free overmind API key at console.overmindlab.ai
-os.environ["OVERMIND_API_KEY"] = "your_overmind_api_key"
-os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
+os.environ["OVERMIND_API_KEY"] = "<your-api-token>"
+os.environ["OPENAI_API_KEY"] = "sk-..."
 
-overmind = OvermindClient()
-
-
-# Use existing OpenAI client methods
-response = overmind.openai.responses.create(
-    model='gpt-5-mini',
-    input="Should I switch my mortgage now or wait for a year to have a lower interest rate?",
-    # Overmind built-in policies
-    input_policies=['anonymize_pii'],
-    output_policies=['reject_irrelevant_answer'],
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-5-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
 )
-
-response.summary()
 ```
 
+All your LLM calls are now traced automatically. After 10+ traces, Overmind starts detecting agents, scoring quality, and generating optimization suggestions.
 
+## Supported Providers
 
-### Define your own policies
-There are different policy templates that can be set up at invocation time.
+### OpenAI
+
 ```python
+from overmind.clients import OpenAI
 
-# Define input policy to filter out PII
-input_pii_policy = {
-    'policy_template': 'anonymize_pii',
-    'parameters': {
-        'pii_types': ['DEMOGRAPHIC_DATA', 'FINANCIAL_ID']
-    }
-}
-
-# Define output policy to check response against criteria
-output_llm_judge_criteria = {
-    'policy_template': 'reject_llm_judge_with_criteria',
-    'parameters': {
-        'criteria': [
-            "Must not be a financial advice",
-            "Must answer the question fully",
-        ]
-    }
-}
-
-input_messages = [
-    {
-        "role": "user", 
-        "content": "Hi my name is Jon, account number 20194812. Should I switch my mortgage now or wait for a year to have a lower interest rate?"
-    }
-]
-
-result = overmind.openai.responses.create(
-    model='gpt-5-mini',
-    input=input_messages,
-    input_policies=[input_pii_policy],
-    output_policies=[output_llm_judge_criteria]
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-5-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
 )
-
-result.summary()
 ```
-### Use Overmind Layers
 
-For more complex use cases you can choose Overmind Layers - an API to call standalone policies without relying on us to call LLMs. 
+Supports `chat.completions.create()`, `responses.create()`, and `embeddings.create()`.
 
-This use case is best demonstrated in our [LangGraph integration tutorial](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Layers%20%26%20LangGraph%20tutorial.ipynb), although the Layers can be used with any framework.
+### Anthropic
 
-## Further usage
+```python
+from overmind.clients import Anthropic
 
-There are a more detailed tutorials available for [Overmind Proxy](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Proxy%20tutorial.ipynb) and [Overmind Layers & LangGraph integration](https://github.com/overmind-core/overmind-python/blob/main/docs/Overmind%20Layers%20%26%20LangGraph%20tutorial.ipynb).
+client = Anthropic()
+response = client.messages.create(
+    model="claude-sonnet-4-5-20250514",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
 
-We are not storing your API keys and you are solely responsible for managing them and the associated costs.
+### Google Gemini
 
-On our side we run policy executions for free as this is an alpha stage product. We may impose usage limits and scale our services up and down from time to time.
+```python
+from overmind.clients.google import Client as GoogleClient
 
-We appreciate any feedback, collaboration or other suggestions. You can reach out at [support@evallab.dev](mailto:support@evallab.dev)
+client = GoogleClient()
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="Hello!",
+)
+```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `OVERMIND_API_KEY` | Yes | Your Overmind API token |
+| `OPENAI_API_KEY` | If using OpenAI | OpenAI API key |
+| `ANTHROPIC_API_KEY` | If using Anthropic | Anthropic API key |
+| `GEMINI_API_KEY` | If using Google Gemini | Google Gemini API key |
+| `OVERMIND_API_URL` | No | Override the Overmind API base URL |
+| `OVERMIND_TRACES_URL` | No | Override the traces endpoint URL |
+
+### Constructor Options
+
+Keys can also be passed directly:
+
+```python
+client = OpenAI(
+    overmind_api_key="ovr_...",
+    api_key="sk-...",
+)
+```
+
+### Self-Hosted
+
+The SDK works with both the managed service and the [self-hosted open-source edition](https://github.com/overmind-core/overmind). API keys prefixed with `ovr_core_` are automatically routed to `localhost:8000`. You can also set `OVERMIND_API_URL` to point to your own deployment.
+
+## Tips
+
+- **One client per use case** — if your app has different prompt patterns (e.g., support agent vs. summarizer), create separate clients so Overmind can extract cleaner prompt templates.
+- **Let it run** — more traces means better recommendations. Check the dashboard after a day or two.
+
+## Documentation
+
+- [Full documentation](https://docs.overmindlab.ai)
+- [Python SDK reference](https://docs.overmindlab.ai/guides/sdk-reference)
+- [JavaScript/TypeScript SDK](https://docs.overmindlab.ai/guides/sdk-js)
+- [Self-hosted platform (OSS)](https://github.com/overmind-core/overmind)
+
+## License
+
+MIT
