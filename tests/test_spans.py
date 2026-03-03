@@ -45,7 +45,7 @@ def test_spans():
             },
         ],
     )
-    sleep(5)
+    sleep(8)
 
     traces_response = requests.get(
         f"{base_url}/api/v1/traces/list",
