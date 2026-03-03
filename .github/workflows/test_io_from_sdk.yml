@@ -48,7 +48,7 @@ jobs:
             venv-${{ matrix.runner }}-py${{ matrix.python-version }}-
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction && poetry add openai
 
       - name: Run tests
         run: poetry run pytest tests/test_spans.py -v
