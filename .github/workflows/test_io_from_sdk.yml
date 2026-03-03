@@ -1,0 +1,63 @@
+name: Test IO from SDK
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: "py${{ matrix.python-version }} / openai-${{ matrix.openai-version }}"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    permissions:
+      id-token: write
+
+    env:
+      OVERMIND_API_KEY: ${{ secrets.OVERMIND_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        openai-version: ["1.70.0", "1.109.1", "2.6.1", "2.20.0", "latest"]
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache virtual environment
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-py${{ matrix.python-version }}-openai-${{ matrix.openai-version }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-py${{ matrix.python-version }}-openai-${{ matrix.openai-version }}-
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Install OpenAI ${{ matrix.openai-version }}
+        run: |
+          source .venv/bin/activate
+          if [ "${{ matrix.openai-version }}" = "latest" ]; then
+            pip install openai
+          else
+            pip install "openai==${{ matrix.openai-version }}"
+          fi
+
+      - name: Run tests
+        run: poetry run pytest tests/test_spans.py -v
