@@ -120,6 +120,10 @@ client = OpenAI(
 
 The SDK works with both the managed service and the [self-hosted open-source edition](https://github.com/overmind-core/overmind). API keys prefixed with `ovr_core_` are automatically routed to `localhost:8000`. You can also set `OVERMIND_API_URL` to point to your own deployment.
 
+## Examples
+
+Interactive [quickstart notebook](docs/quickstart.ipynb) with a mock customer-support agent scenario — sends 30 traced calls through each provider (90 total) and explains the Overmind optimization pipeline.
+
 ## Tips
 
 - **One client per use case** — if your app has different prompt patterns (e.g., support agent vs. summarizer), create separate clients so Overmind can extract cleaner prompt templates.
