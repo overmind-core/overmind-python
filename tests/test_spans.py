@@ -3,6 +3,7 @@ import json
 import os
 import requests
 from time import sleep
+from opentelemetry import trace as otel_trace
 from overmind.clients import OpenAI
 
 project_id = os.environ.get("OVERMIND_PROJECT_ID", "e5445c2d-0e4b-4cb1-8a0c-26c18d0ba19f")
@@ -75,7 +76,7 @@ def test_spans():
             },
         ],
     )
-    sleep(8)
+    otel_trace.get_tracer_provider().force_flush()
 
     retries = 4
     for i in range(retries):
