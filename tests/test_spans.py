@@ -14,6 +14,36 @@ openai_client = OpenAI(
 )
 
 
+def check_for_signature(signature: str) -> list[bool]:
+    traces_response = requests.get(
+        f"{base_url}/api/v1/traces/list",
+        params=dict(
+            project_id=project_id,
+            limit=5,
+            offset=0,
+            root_only=True,
+        ),
+        headers={
+            "X-API-Token": os.getenv("OVERMIND_API_KEY"),
+        },
+    )
+    assert traces_response.status_code == 200
+    traces = traces_response.json()["traces"]
+    input_has_signature = []
+    for trace in traces:
+        has_signature = signature in trace["Inputs"]
+        input_has_signature.append(has_signature)
+        if not has_signature:
+            continue
+
+        span_attributes = trace["SpanAttributes"]
+        assert span_attributes["gen_ai.request.model"] == "gpt-5-mini"
+        assert span_attributes["gen_ai.completion.0.finish_reason"] == "stop"
+        assert span_attributes["gen_ai.request.structured_output_schema"] == json.dumps({"type": "json_object"})
+
+    return input_has_signature
+
+
 today = str(datetime.now().timestamp())
 system_prompt = f"""You are a fashion taxonomy assistant.
 Classify the product into exactly one category from the allowed list.
@@ -47,30 +77,12 @@ def test_spans():
     )
     sleep(8)
 
-    traces_response = requests.get(
-        f"{base_url}/api/v1/traces/list",
-        params=dict(
-            project_id=project_id,
-            limit=5,
-            offset=0,
-            root_only=True,
-        ),
-        headers={
-            "X-API-Token": os.getenv("OVERMIND_API_KEY"),
-        },
-    )
-    assert traces_response.status_code == 200
-    traces = traces_response.json()["traces"]
-    input_has_today = []
-    for trace in traces:
-        has_sign = today in trace["Inputs"]
-        input_has_today.append(has_sign)
-        if not has_sign:
-            continue
+    retries = 4
+    for i in range(retries):
+        input_has_signature = check_for_signature(today)
+        if any(input_has_signature):
+            break
+        if i < retries - 1:
+            sleep(5)
 
-        span_attributes = trace["SpanAttributes"]
-        assert span_attributes["gen_ai.request.model"] == "gpt-5-mini"
-        assert span_attributes["gen_ai.completion.0.finish_reason"] == "stop"
-        assert span_attributes["gen_ai.request.structured_output_schema"] == json.dumps({"type": "json_object"})
-
-    assert any(input_has_today), "unable to find trace pushed to prod"
+    assert any(input_has_signature), "unable to find trace pushed to prod"
