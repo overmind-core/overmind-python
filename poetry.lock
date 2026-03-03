@@ -637,6 +637,27 @@ packaging = ">=18.0"
 wrapt = ">=1.0.0,<2.0.0"
 
 [[package]]
+name = "opentelemetry-instrumentation-agno"
+version = "0.52.6"
+description = "OpenTelemetry Agno instrumentation"
+optional = false
+python-versions = "<4,>=3.10"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_agno-0.52.6-py3-none-any.whl", hash = "sha256:fcd51ad038ebcc119d45f0a9cdaf70627109a10526a73e0b6cb36da1a6d6c0b9"},
+    {file = "opentelemetry_instrumentation_agno-0.52.6.tar.gz", hash = "sha256:7fbd9608e8326feef8ceea3a4cbac84d5f5684448d7afa25973c1cf465d77bba"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.28.0,<2"
+opentelemetry-instrumentation = ">=0.59b0"
+opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
+
+[package.extras]
+instruments = ["agno"]
+
+[[package]]
 name = "opentelemetry-instrumentation-anthropic"
 version = "0.52.3"
 description = "OpenTelemetry Anthropic instrumentation"
@@ -1991,4 +2012,4 @@ full = ["opentelemetry-instrumentation-httpx", "opentelemetry-instrumentation-lo
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "b4239eb9caec2076c8c73cb901f42e2a37d882b6570607dccd7a603e730c1ee1"
+content-hash = "434526bf1bafd614ec64b434a09c9a4d87cb483ef8b5e83f762a530c7c5d5407"

@@ -103,26 +103,6 @@ def init(
     # Store tracer for custom spans
     _tracer = trace.get_tracer("overmind", "0.1.15")
 
-    # Instrument OpenAI (for LLM call tracing) - using vendored patched version
-    try:
-        from overmind._vendor.opentelemetry_instrumentation_openai import OpenAIInstrumentor
-        OpenAIInstrumentor().instrument()
-        logger.info("Overmind SDK: OpenAI instrumentation enabled (patched).")
-    except ImportError:
-        logger.debug("Overmind SDK: opentelemetry-instrumentation-openai not found, skipping.")
-    except Exception as e:
-        logger.warning(f"Overmind SDK: Failed to instrument OpenAI: {e}")
-
-    # Instrument logging (to correlate logs with traces)
-    try:
-        from opentelemetry.instrumentation.logging import LoggingInstrumentor
-        LoggingInstrumentor().instrument(set_logging_format=True)
-        logger.info("Overmind SDK: Logging instrumentation enabled.")
-    except ImportError:
-        logger.debug("Overmind SDK: opentelemetry-instrumentation-logging not found, skipping.")
-    except Exception as e:
-        logger.warning(f"Overmind SDK: Failed to instrument Logging: {e}")
-
     _initialized = True
     logger.info(
         f"Overmind SDK initialized: service={resolved_service_name}, "

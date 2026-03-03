@@ -1,5 +1,3 @@
-import logging
-
 from overmind.clients.overmind_client import OvermindClient
 
 try:
@@ -9,8 +7,6 @@ try:
     from google import genai
 except ImportError:
     raise ImportError("google-genai is not installed. Please install it with `pip install google-genai`.")
-
-logger = logging.getLogger(__name__)
 
 
 class Client(genai.Client):

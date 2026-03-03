@@ -1,13 +1,12 @@
-import logging
-
 from overmind.clients.overmind_client import OvermindClient
 
 try:
+    import overmind._vendor.opentelemetry_instrumentation_openai as __openai_instrumentation
+
+    __openai_instrumentation.OpenAIInstrumentor().instrument()
     import openai as __openai
 except ImportError:
     raise ImportError("openai is not installed. Please install it with `pip install openai`.")
-
-logger = logging.getLogger(__name__)
 
 
 class OpenAI(__openai.OpenAI):

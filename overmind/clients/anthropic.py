@@ -1,5 +1,3 @@
-import logging
-
 from overmind.clients.overmind_client import OvermindClient
 
 try:
@@ -9,8 +7,6 @@ try:
     import anthropic as __anthropic
 except ImportError:
     raise ImportError("anthropic is not installed. Please install it with `pip install anthropic`.")
-
-logger = logging.getLogger(__name__)
 
 
 class Anthropic(__anthropic.Anthropic):
