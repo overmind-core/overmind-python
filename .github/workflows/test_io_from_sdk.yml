@@ -10,6 +10,7 @@ jobs:
   test:
     name: "py${{ matrix.python-version }} / ${{ matrix.arch }}"
     runs-on: ${{ matrix.runner }}
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
 
     strategy:
       fail-fast: false
