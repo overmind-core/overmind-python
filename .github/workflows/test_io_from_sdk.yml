@@ -8,21 +8,21 @@ on:
 
 jobs:
   test:
-    name: "py${{ matrix.python-version }} / ${{ matrix.arch }}"
-    runs-on: ${{ matrix.runner }}
+    name: "py${{ matrix.python-version }} / openai-${{ matrix.openai-version }}"
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.pull_request.draft == false
     permissions:
       id-token: write
+
+    env:
+      OVERMIND_API_KEY: ${{ secrets.OVERMIND_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
-        include:
-          - arch: x86_64
-            runner: ubuntu-latest
-          - arch: arm64
-            runner: ubuntu-24.04-arm
+        openai-version: ["1.0.0", "1.10.0", "1.30.0", "latest"]
 
     steps:
       - name: Check out the repository
@@ -43,12 +43,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ matrix.runner }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: venv-py${{ matrix.python-version }}-openai-${{ matrix.openai-version }}-${{ hashFiles('poetry.lock') }}
           restore-keys: |
-            venv-${{ matrix.runner }}-py${{ matrix.python-version }}-
+            venv-py${{ matrix.python-version }}-openai-${{ matrix.openai-version }}-
 
       - name: Install dependencies
-        run: poetry install --no-interaction && poetry add openai
+        run: poetry install --no-interaction
+
+      - name: Install OpenAI ${{ matrix.openai-version }}
+        run: |
+          source .venv/bin/activate
+          if [ "${{ matrix.openai-version }}" = "latest" ]; then
+            pip install openai
+          else
+            pip install "openai==${{ matrix.openai-version }}"
+          fi
 
       - name: Run tests
         run: poetry run pytest tests/test_spans.py -v
