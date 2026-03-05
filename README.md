@@ -65,7 +65,7 @@ from openai import OpenAI
 client = OpenAI()  # your existing client, unchanged
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Explain quantum computing"}],
 )
 print(response.choices[0].message.content)
@@ -87,7 +87,7 @@ overmind.init(service_name="my-service", providers=["openai"])
 
 client = OpenAI()
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
@@ -102,7 +102,7 @@ overmind.init(service_name="my-service", providers=["anthropic"])
 
 client = anthropic.Anthropic()
 message = client.messages.create(
-    model="claude-opus-4-5",
+    model="claude-haiku-4-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
@@ -132,7 +132,7 @@ from agno.models.openai import OpenAIChat
 
 overmind.init(service_name="my-service", providers=["agno"])
 
-agent = Agent(model=OpenAIChat(id="gpt-4o"), markdown=True)
+agent = Agent(model=OpenAIChat(id="gpt-4o-mini"), markdown=True, name="Storyteller")
 agent.print_response("Write a short poem about the sea.")
 ```
 
@@ -264,7 +264,7 @@ def handle_query(user_id: str, question: str) -> str:
     with tracer.start_as_current_span("handle-support-query"):
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a helpful customer support agent."},
                     {"role": "user", "content": question},
