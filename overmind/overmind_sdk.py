@@ -10,46 +10,75 @@ from overmind.utils.api_settings import get_api_settings
 
 logger = logging.getLogger(__name__)
 
+# Global state to track initialization
+_initialized = False
+_tracer: trace.Tracer | None = None
+_providers: set[str] = set()
+
 
 def enable_agno():
+    global _providers
+    if "agno" in _providers:
+        logger.debug("%s already enabled", "agno")
+        return
     try:
         from opentelemetry.instrumentation.agno import AgnoInstrumentor
 
         AgnoInstrumentor().instrument()
         import agno  # noqa: F401
 
+        _providers.add("agno")
+
     except ImportError:
         raise ImportError("agno is not installed. Please install it with `pip install agno`.")
 
 
 def enable_openai():
+    global _providers
+    if "openai" in _providers:
+        logger.debug("%s already enabled", "openai")
+        return
     try:
         from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
         OpenAIInstrumentor().instrument()
         from openai import OpenAI  # noqa: F401
 
+        _providers.add("openai")
+
     except ImportError:
         raise ImportError("openai is not installed. Please install it with `pip install openai`.")
 
 
 def enable_anthropic():
+    global _providers
+    if "anthropic" in _providers:
+        logger.debug("%s already enabled", "anthropic")
+        return
     try:
         from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
         AnthropicInstrumentor().instrument()
         from anthropic import Anthropic  # noqa: F401
 
+        _providers.add("anthropic")
+
     except ImportError:
         raise ImportError("anthropic is not installed. Please install it with `pip install anthropic`.")
 
 
 def enable_google_genai():
+    global _providers
+    if "google" in _providers:
+        logger.debug("%s already enabled", "google")
+        return
     try:
         from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
 
         GoogleGenerativeAiInstrumentor().instrument()
         from google import genai  # noqa: F401
+
+        _providers.add("google")
 
     except ImportError:
         raise ImportError("google-genai is not installed. Please install it with `pip install google-genai`.")
@@ -69,28 +98,22 @@ def enable_tracing(providers: list[str]):
         if importlib.util.find_spec("agno") is not None:
             providers.append("agno")
 
+    logger.info("Enabling tracing for providers: %s", providers)
     if "agno" in providers:
         enable_agno()
-    elif "openai" in providers:
+    if "openai" in providers:
         enable_openai()
-    elif "anthropic" in providers:
+    if "anthropic" in providers:
         enable_anthropic()
-    elif "google" in providers:
+    if "google" in providers:
         enable_google_genai()
-    else:
-        raise ValueError(f"Tracing for {providers} is not supported")
-
-
-# Global state to track initialization
-_initialized = False
-_tracer: trace.Tracer | None = None
 
 
 def init(
     overmind_api_key: str | None = None,
     *,
-    service_name: str = "unknown-service",
-    environment: str = "development",
+    service_name: str | None = None,
+    environment: str | None = None,
     providers: list[str] = [],
     overmind_base_url: str | None = None,
 ):
@@ -113,11 +136,19 @@ def init(
     global _initialized, _tracer
 
     if _initialized:
-        logger.debug("Overmind SDK already initialized, skipping.")
+        # user can call init again with different providers, so we should not skip
+        # there is no such thing as remove initialization
+        logger.debug("Overmind SDK already initialized, reinitializing with providers: %s", providers)
+        enable_tracing(providers)
         return
 
-    service_name = service_name or os.environ.get("OVERMIND_SERVICE_NAME") or os.environ.get("SERVICE_NAME")
-    environment = environment or os.environ.get("OVERMIND_ENVIRONMENT") or os.environ.get("ENVIRONMENT")
+    # Resolve service name and environment
+    service_name = (
+        service_name or os.environ.get("OVERMIND_SERVICE_NAME") or os.environ.get("SERVICE_NAME") or "unknown-service"
+    )
+    environment = (
+        environment or os.environ.get("OVERMIND_ENVIRONMENT") or os.environ.get("ENVIRONMENT") or "development"
+    )
 
     overmind_api_key, overmind_base_url = get_api_settings(overmind_api_key, overmind_base_url)
 
