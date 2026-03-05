@@ -56,6 +56,19 @@ def enable_google_genai():
 
 
 def enable_tracing(providers: list[str]):
+    import importlib.util
+
+    if providers == []:
+        # if no providers are provided, enable all supported providers with their packages installed
+        if importlib.util.find_spec("openai") is not None:
+            providers.append("openai")
+        if importlib.util.find_spec("anthropic") is not None:
+            providers.append("anthropic")
+        if importlib.util.find_spec("google.genai") is not None:
+            providers.append("google")
+        if importlib.util.find_spec("agno") is not None:
+            providers.append("agno")
+
     if "agno" in providers:
         enable_agno()
     elif "openai" in providers:
