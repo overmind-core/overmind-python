@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Optional
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -11,42 +10,92 @@ from overmind.utils.api_settings import get_api_settings
 
 logger = logging.getLogger(__name__)
 
+
+def enable_agno():
+    try:
+        from opentelemetry.instrumentation.agno import AgnoInstrumentor
+
+        AgnoInstrumentor().instrument()
+        import agno  # noqa: F401
+
+    except ImportError:
+        raise ImportError("agno is not installed. Please install it with `pip install agno`.")
+
+
+def enable_openai():
+    try:
+        from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+
+        OpenAIInstrumentor().instrument()
+        from openai import OpenAI  # noqa: F401
+
+    except ImportError:
+        raise ImportError("openai is not installed. Please install it with `pip install openai`.")
+
+
+def enable_anthropic():
+    try:
+        from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
+        AnthropicInstrumentor().instrument()
+        from anthropic import Anthropic  # noqa: F401
+
+    except ImportError:
+        raise ImportError("anthropic is not installed. Please install it with `pip install anthropic`.")
+
+
+def enable_google_genai():
+    try:
+        from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
+
+        GoogleGenerativeAiInstrumentor().instrument()
+        from google import genai  # noqa: F401
+
+    except ImportError:
+        raise ImportError("google-genai is not installed. Please install it with `pip install google-genai`.")
+
+
+def enable_tracing(providers: list[str]):
+    if "agno" in providers:
+        enable_agno()
+    elif "openai" in providers:
+        enable_openai()
+    elif "anthropic" in providers:
+        enable_anthropic()
+    elif "google" in providers:
+        enable_google_genai()
+    else:
+        raise ValueError(f"Tracing for {providers} is not supported")
+
+
 # Global state to track initialization
 _initialized = False
-_tracer: Optional[trace.Tracer] = None
+_tracer: trace.Tracer | None = None
 
 
 def init(
-    overmind_api_key: Optional[str] = None,
-    traces_base_url: Optional[str] = None,
-    service_name: Optional[str] = None,
-    environment: Optional[str] = None,
-    processes_sample_rate: float = 1.0,
-    capture_request_body: bool = True,
-    capture_response_body: bool = True,
-) -> None:
+    overmind_api_key: str | None = None,
+    *,
+    service_name: str = "unknown-service",
+    environment: str = "development",
+    providers: list[str] = [],
+    overmind_base_url: str | None = None,
+):
     """
     Initialize the Overmind SDK for automatic monitoring.
 
-    Call this once at application startup, before creating your FastAPI app.
-
     Example:
         import overmind
-        overmind.init(service_name="my-backend")
-
-        from fastapi import FastAPI
-        app = FastAPI()
+        overmind.init(service_name="my-backend", environment="production", providers=["openai", "anthropic", "google", "agno"])
 
     Args:
         overmind_api_key: Your Overmind API key. If not provided, uses OVERMIND_API_KEY env var.
-        traces_base_url: Base URL for traces. If not provided, uses OVERMIND_TRACES_URL env var.
         service_name: Name of your service (appears in traces). Defaults to OVERMIND_SERVICE_NAME
                       env var or "unknown-service".
         environment: Environment name (e.g., "production", "staging"). Defaults to
                      OVERMIND_ENVIRONMENT env var or "development".
-        processes_sample_rate: Sampling rate for traces (0.0 to 1.0). Default 1.0 captures all.
-        capture_request_body: Whether to capture OpenAI request payloads. Default True.
-        capture_response_body: Whether to capture OpenAI response payloads. Default True.
+        providers: List of providers to trace. Supported values: "openai", "anthropic", "google", "agno".
+        overmind_base_url: Base URL for traces. If not provided, uses OVERMIND_API_URL env var.
     """
     global _initialized, _tracer
 
@@ -54,44 +103,28 @@ def init(
         logger.debug("Overmind SDK already initialized, skipping.")
         return
 
-    try:
-        api_key, _, traces_url = get_api_settings(
-            overmind_api_key=overmind_api_key,
-            traces_base_url=traces_base_url,
-        )
-    except Exception as e:
-        logger.error(f"Failed to initialize Overmind SDK settings: {e}")
-        return
+    service_name = service_name or os.environ.get("OVERMIND_SERVICE_NAME") or os.environ.get("SERVICE_NAME")
+    environment = environment or os.environ.get("OVERMIND_ENVIRONMENT") or os.environ.get("ENVIRONMENT")
 
-    # Resolve service name and environment
-    resolved_service_name = (
-        service_name
-        or os.environ.get("OVERMIND_SERVICE_NAME")
-        or os.environ.get("SERVICE_NAME")
-        or "unknown-service"
-    )
-    resolved_environment = (
-        environment
-        or os.environ.get("OVERMIND_ENVIRONMENT")
-        or os.environ.get("ENVIRONMENT")
-        or "development"
-    )
+    overmind_api_key, overmind_base_url = get_api_settings(overmind_api_key, overmind_base_url)
 
-    endpoint = f"{traces_url}/api/v1/traces/create"
+    endpoint = f"{overmind_base_url}/api/v1/traces"
 
     # Configure OpenTelemetry Provider with rich resource attributes
-    resource = Resource.create({
-        "service.name": resolved_service_name,
-        "service.version": os.environ.get("SERVICE_VERSION", "unknown"),
-        "deployment.environment": resolved_environment,
-        "overmind.sdk.name": "overmind-python",
-        "overmind.sdk.version": "0.1.15",
-    })
+    resource = Resource.create(
+        {
+            "service.name": service_name,
+            "service.version": os.environ.get("SERVICE_VERSION", "unknown"),
+            "deployment.environment": environment,
+            "overmind.sdk.name": "overmind-python",
+            "overmind.sdk.version": "0.1.15",
+        }
+    )
 
     provider = TracerProvider(resource=resource)
 
     # Configure OTLP Exporter
-    headers = {"X-API-Token": api_key}
+    headers = {"X-API-Token": overmind_api_key}
 
     otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
     span_processor = BatchSpanProcessor(otlp_exporter)
@@ -102,11 +135,13 @@ def init(
 
     # Store tracer for custom spans
     _tracer = trace.get_tracer("overmind", "0.1.15")
+    enable_tracing(providers)
 
     _initialized = True
     logger.info(
-        f"Overmind SDK initialized: service={resolved_service_name}, "
-        f"environment={resolved_environment}"
+        "Overmind SDK initialized: service=%s, environment=%s",
+        service_name,
+        environment,
     )
 
 
@@ -127,13 +162,11 @@ def get_tracer() -> trace.Tracer:
         RuntimeError: If SDK not initialized.
     """
     if not _initialized or _tracer is None:
-        raise RuntimeError(
-            "Overmind SDK not initialized. Call overmind.init() first."
-        )
+        raise RuntimeError("Overmind SDK not initialized. Call overmind.init() first.")
     return _tracer
 
 
-def set_user(user_id: str, email: Optional[str] = None, username: Optional[str] = None) -> None:
+def set_user(user_id: str, email: str | None = None, username: str | None = None) -> None:
     """
     Associate current trace with a user (like Sentry's set_user).
 

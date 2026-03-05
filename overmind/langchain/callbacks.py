@@ -16,17 +16,15 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
     def __init__(
         self,
         graph: Optional[StateGraph] = None,
-        name: Optional[str] = '',
+        name: Optional[str] = "",
         tags: Optional[dict] = {},
         overmind_api_key: Optional[str] = None,
-        traces_base_url: Optional[str] = None,
+        overmind_base_url: Optional[str] = None,
         debug: bool = False,
     ):
         super().__init__()
         self.debug = debug
-        self.overmind_api_key, _, self.traces_base_url = get_api_settings(
-            overmind_api_key, None, traces_base_url
-        )
+        self.overmind_api_key, self.overmind_base_url = get_api_settings(overmind_api_key, overmind_base_url)
         # This is where the magic happens!
         current_provider = trace.get_tracer_provider()
         if not hasattr(current_provider, "add_span_processor"):
@@ -48,7 +46,7 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
         provider = TracerProvider()
 
         exporter = OTLPSpanExporter(
-            endpoint=f"{self.traces_base_url}/api/v1/traces/create",
+            endpoint=f"{self.overmind_base_url}/api/v1/traces",
             headers={"X-API-Token": self.overmind_api_key},
         )
 
@@ -64,10 +62,7 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
     def on_chain_start(self, serialized, inputs, *, run_id, **kwargs):
         name = (
             kwargs.get("name")
-            or (
-                serialized
-                and (str(serialized.get("name") or str(serialized.get("id", [""])[-1])))
-            )
+            or (serialized and (str(serialized.get("name") or str(serialized.get("id", [""])[-1]))))
             or "<unknown>"
         )
 
@@ -83,13 +78,11 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
             if self.graph:
                 metadata["graph"] = self.parse_graph(self.graph)
                 self.graph_hash = hashlib.sha256(
-                    json.dumps(metadata["graph"], sort_keys=True).encode('utf-8')
+                    json.dumps(metadata["graph"], sort_keys=True).encode("utf-8")
                 ).hexdigest()
 
         else:
-            parent_context = trace.set_span_in_context(
-                self.run_spans[str(parent_run_id)]
-            )
+            parent_context = trace.set_span_in_context(self.run_spans[str(parent_run_id)])
             self.run_spans[run_id] = self.tracer.start_span(
                 name=name,
                 context=parent_context,
@@ -98,7 +91,9 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
         if self.graph:
             self.run_spans[run_id].set_attribute("workflow_name", self.name)
             self.run_spans[run_id].set_attribute("workflow_hash", self.graph_hash)
-            self.run_spans[run_id].set_attribute("workflow_tags", serialize(self.tags) if isinstance(self.tags, dict) else '{}')
+            self.run_spans[run_id].set_attribute(
+                "workflow_tags", serialize(self.tags) if isinstance(self.tags, dict) else "{}"
+            )
 
         self.run_spans[run_id].set_attribute("metadata", serialize(metadata))
         self.run_spans[run_id].set_attribute("inputs", serialize(inputs))
@@ -107,19 +102,13 @@ class OvermindObservabilityCallback(BaseCallbackHandler):
         run_id = str(run_id)
 
         if "policy_results" in outputs:
-            self.run_spans[run_id].set_attribute(
-                "policy_outcome", outputs["overall_policy_outcome"]
-            )
-            self.run_spans[run_id].set_attribute(
-                "policy_results", serialize(outputs.pop("policy_results"))
-            )
+            self.run_spans[run_id].set_attribute("policy_outcome", outputs["overall_policy_outcome"])
+            self.run_spans[run_id].set_attribute("policy_results", serialize(outputs.pop("policy_results")))
 
         if "span_context" in outputs:
             # can't add links to the span that has been started and there is no clean way to pass
             # this span to the backend at the layer run time (since it happening in a downstream node)
-            self.run_spans[run_id].set_attribute(
-                "span_context", serialize(outputs.pop("span_context"))
-            )
+            self.run_spans[run_id].set_attribute("span_context", serialize(outputs.pop("span_context")))
 
         self.run_spans[run_id].set_attribute("outputs", serialize(outputs))
         self.run_spans[run_id].set_status(trace.Status(trace.StatusCode.OK))
