@@ -58,6 +58,7 @@ full = [
 pytest = "^7.0.0"
 ruff = "^0.4.4"
 fastapi = "*"
+openai = "^2.26.0"
 
 [build-system]
 requires = ["poetry-core"]

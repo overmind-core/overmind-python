@@ -4,15 +4,15 @@ import os
 import requests
 from time import sleep
 from opentelemetry import trace as otel_trace
-from overmind.clients import OpenAI
+from overmind import init
+from openai import OpenAI
+
 
 project_id = os.environ.get("OVERMIND_PROJECT_ID", "e5445c2d-0e4b-4cb1-8a0c-26c18d0ba19f")
 
 base_url = "https://api.overmindlab.ai"
-openai_client = OpenAI(
-    overmind_base_url=base_url,
-    overmind_api_key=os.getenv("OVERMIND_API_KEY"),
-)
+init(api_key=os.getenv("OVERMIND_API_KEY"))
+openai_client = OpenAI()
 
 
 def check_for_signature(signature: str) -> list[bool]:
