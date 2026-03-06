@@ -4,7 +4,7 @@ Main Overmind client implementation.
 
 import os
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence
 from urllib.parse import urljoin
 
 import requests
@@ -93,14 +93,10 @@ class OvermindClient:
         Raises:
             OvermindError: If no API key is provided and OVERMIND_API_KEY environment variable is not set
         """
-        self.overmind_api_key, self.base_url, self.traces_base_url = get_api_settings(
-            overmind_api_key, base_url, None
-        )
+        self.overmind_api_key, self.base_url = get_api_settings(overmind_api_key, base_url)
 
         # Start with provided provider parameters
-        self.provider_parameters = (
-            provider_parameters.copy() if provider_parameters else {}
-        )
+        self.provider_parameters = provider_parameters.copy() if provider_parameters else {}
 
         # Add common environment variables if they exist and aren't already in provider_parameters
         for env_var, param_name in COMMON_ENV_VARS.items():
@@ -158,9 +154,7 @@ class OvermindClient:
         url = urljoin(f"{self.base_url}/api/v1/", endpoint)
 
         try:
-            response = self.session.request(
-                method=method, url=url, json=data, params=params
-            )
+            response = self.session.request(method=method, url=url, json=data, params=params)
 
             if response.status_code == 401:
                 raise OvermindAuthenticationError("Invalid Overmind API key")
@@ -210,9 +204,7 @@ class OvermindClient:
             "output_policies": output_policies,
         }
 
-        response_data = self._make_request(
-            "POST", f"proxy/run/{client_path}", data=payload
-        )
+        response_data = self._make_request("POST", f"proxy/run/{client_path}", data=payload)
 
         return ProxyRunResponse(**response_data)
 
@@ -224,9 +216,7 @@ class OvermindLayersClient:
         base_url: Optional[str] = None,
         traces_base_url: Optional[str] = None,
     ):
-        self.overmind_api_key, self.base_url, self.traces_base_url = get_api_settings(
-            overmind_api_key, base_url, traces_base_url
-        )
+        self.overmind_api_key, self.base_url = get_api_settings(overmind_api_key, base_url)
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -248,9 +238,7 @@ class OvermindLayersClient:
             "kwargs": kwargs,
         }
 
-        response_data = self.session.request(
-            "POST", f"{self.base_url}/api/v1/layers/run", json=payload
-        )
+        response_data = self.session.request("POST", f"{self.base_url}/api/v1/layers/run", json=payload)
 
         if response_data.status_code != 200:
             raise OvermindAPIError(
