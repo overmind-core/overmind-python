@@ -283,7 +283,7 @@ print(answer)
 
 ## What Happens After Your First Traces
 
-Once Overmind has collected 10+ traces for a given prompt pattern, the optimization engine starts automatically:
+Once Overmind has collected 30+ traces for a given prompt pattern, the optimization engine starts automatically:
 
 1. **Agent detection** — extracts prompt templates from your traces
 2. **LLM judge scoring** — evaluates each trace against auto-generated quality criteria

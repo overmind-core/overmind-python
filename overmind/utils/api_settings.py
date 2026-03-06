@@ -1,6 +1,5 @@
 import os
 from overmind.client import OvermindError
-from typing import Optional
 
 LOCAL_API_KEY_PREFIX = "ovr_core_"
 LOCAL_BASE_URL = "http://localhost:8000"
@@ -8,9 +7,9 @@ DEFAULT_BASE_URL = "https://api.overmindlab.ai"
 
 
 def get_api_settings(
-    overmind_api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-) -> tuple[str, str, str]:
+    overmind_api_key: str | None = None,
+    base_url: str | None = None,
+) -> tuple[str, str]:
     overmind_api_key = overmind_api_key or os.getenv("OVERMIND_API_KEY")
     if not overmind_api_key:
         raise OvermindError(

@@ -5,10 +5,19 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
+import importlib.metadata
+import importlib.util
 
 from overmind.utils.api_settings import get_api_settings
 
 logger = logging.getLogger(__name__)
+
+try:
+    _SDK_VERSION = importlib.metadata.version("overmind")
+except importlib.metadata.PackageNotFoundError:
+    _SDK_VERSION = "unknown"
+
+_strict_mode = os.environ.get("OVERMIND_STRICT_MODE", "false").lower() == "true"
 
 # Global state to track initialization
 _initialized = False
@@ -17,86 +26,94 @@ _providers: set[str] = set()
 
 
 def enable_agno():
+    name, module = "agno", "agno"
     global _providers
-    if "agno" in _providers:
-        logger.debug("%s already enabled", "agno")
+    if name in _providers:
+        logger.debug("%s already enabled", name)
         return
-    try:
-        from opentelemetry.instrumentation.agno import AgnoInstrumentor
 
-        AgnoInstrumentor().instrument()
-        import agno  # noqa: F401
+    if importlib.util.find_spec(module) is None:
+        if _strict_mode:
+            raise ImportError(f"{module} is not installed. Please install it with `pip install {module}`.")
+        logger.warning("%s is not installed. Please install it with `pip install %s`.", module, module)
+        return
 
-        _providers.add("agno")
+    from opentelemetry.instrumentation.agno import AgnoInstrumentor
 
-    except ImportError:
-        raise ImportError("agno is not installed. Please install it with `pip install agno`.")
+    AgnoInstrumentor().instrument()
+    _providers.add(name)
+    logger.info("%s instrumentation enabled", name)
 
 
 def enable_openai():
+    name, module = "openai", "openai"
     global _providers
-    if "openai" in _providers:
-        logger.debug("%s already enabled", "openai")
+    if name in _providers:
+        logger.debug("%s already enabled", name)
         return
-    try:
-        from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
-        OpenAIInstrumentor().instrument()
-        from openai import OpenAI  # noqa: F401
+    if importlib.util.find_spec(module) is None:
+        if _strict_mode:
+            raise ImportError(f"{module} is not installed. Please install it with `pip install {module}`.")
+        logger.warning("%s is not installed. Please install it with `pip install %s`.", module, module)
+        return
 
-        _providers.add("openai")
+    from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
-    except ImportError:
-        raise ImportError("openai is not installed. Please install it with `pip install openai`.")
+    OpenAIInstrumentor().instrument()
+
+    _providers.add(name)
+    logger.info("%s instrumentation enabled", name)
 
 
 def enable_anthropic():
+    name, module = "anthropic", "anthropic"
     global _providers
-    if "anthropic" in _providers:
-        logger.debug("%s already enabled", "anthropic")
+    if name in _providers:
+        logger.debug("%s already enabled", name)
         return
-    try:
-        from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
-        AnthropicInstrumentor().instrument()
-        from anthropic import Anthropic  # noqa: F401
+    if importlib.util.find_spec(module) is None:
+        if _strict_mode:
+            raise ImportError(f"{module} is not installed. Please install it with `pip install {module}`.")
+        logger.warning("%s is not installed. Please install it with `pip install %s`.", module, module)
+        return
 
-        _providers.add("anthropic")
+    from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
-    except ImportError:
-        raise ImportError("anthropic is not installed. Please install it with `pip install anthropic`.")
+    AnthropicInstrumentor().instrument()
+
+    _providers.add(name)
+    logger.info("%s instrumentation enabled", name)
 
 
 def enable_google_genai():
+    name, module = "google", "google.genai"
+
     global _providers
-    if "google" in _providers:
-        logger.debug("%s already enabled", "google")
+    if name in _providers:
+        logger.debug("%s already enabled", name)
         return
-    try:
-        from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
 
-        GoogleGenerativeAiInstrumentor().instrument()
-        from google import genai  # noqa: F401
+    if importlib.util.find_spec(module) is None:
+        module = module.replace(".", "-")
+        if _strict_mode:
+            raise ImportError(f"{module} is not installed. Please install it with `pip install {module}`.")
+        logger.warning("%s is not installed. Please install it with `pip install %s`.", module, module)
+        return
 
-        _providers.add("google")
+    from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
 
-    except ImportError:
-        raise ImportError("google-genai is not installed. Please install it with `pip install google-genai`.")
+    GoogleGenerativeAiInstrumentor().instrument()
+
+    _providers.add(name)
+    logger.info("%s instrumentation enabled", name)
 
 
 def enable_tracing(providers: list[str]):
-    import importlib.util
-
     if providers == []:
-        # if no providers are provided, enable all supported providers with their packages installed
-        if importlib.util.find_spec("openai") is not None:
-            providers.append("openai")
-        if importlib.util.find_spec("anthropic") is not None:
-            providers.append("anthropic")
-        if importlib.util.find_spec("google.genai") is not None:
-            providers.append("google")
-        if importlib.util.find_spec("agno") is not None:
-            providers.append("agno")
+        # if no providers are provided, enable all supported providers
+        providers = ["openai", "anthropic", "google", "agno"]
 
     logger.info("Enabling tracing for providers: %s", providers)
     if "agno" in providers:
@@ -114,7 +131,7 @@ def init(
     *,
     service_name: str | None = None,
     environment: str | None = None,
-    providers: list[str] = [],
+    providers: list[str] | None = None,
     overmind_base_url: str | None = None,
 ):
     """
@@ -134,6 +151,9 @@ def init(
         overmind_base_url: Base URL for traces. If not provided, uses OVERMIND_API_URL env var.
     """
     global _initialized, _tracer
+
+    if providers is None:
+        providers = []
 
     if _initialized:
         # user can call init again with different providers, so we should not skip
@@ -161,7 +181,7 @@ def init(
             "service.version": os.environ.get("SERVICE_VERSION", "unknown"),
             "deployment.environment": environment,
             "overmind.sdk.name": "overmind-python",
-            "overmind.sdk.version": "0.1.15",
+            "overmind.sdk.version": _SDK_VERSION,
         }
     )
 
@@ -178,7 +198,7 @@ def init(
     trace.set_tracer_provider(provider)
 
     # Store tracer for custom spans
-    _tracer = trace.get_tracer("overmind", "0.1.15")
+    _tracer = trace.get_tracer("overmind", _SDK_VERSION)
     enable_tracing(providers)
 
     _initialized = True
