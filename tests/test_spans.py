@@ -11,7 +11,7 @@ from openai import OpenAI
 project_id = os.environ.get("OVERMIND_PROJECT_ID", "e5445c2d-0e4b-4cb1-8a0c-26c18d0ba19f")
 
 base_url = "https://api.overmindlab.ai"
-init(api_key=os.getenv("OVERMIND_API_KEY"))
+init(service_name="test-spans", environment="local", providers=["openai"])
 openai_client = OpenAI()
 
 
