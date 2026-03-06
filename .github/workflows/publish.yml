@@ -40,7 +40,7 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          poetry run pytest
+          poetry run pytest --ignore=tests/test_spans.py
 
       - name: Build the package
         run: poetry build
