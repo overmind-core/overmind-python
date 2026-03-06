@@ -48,7 +48,7 @@ jobs:
             venv-py${{ matrix.python-version }}-openai-${{ matrix.openai-version }}-
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --all-groups
 
       - name: Install OpenAI ${{ matrix.openai-version }}
         run: |

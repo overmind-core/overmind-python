@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./pr
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction --no-root --all-groups
 
       - name: Set PYTHONPATH
         working-directory: ./pr
