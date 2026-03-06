@@ -936,6 +936,27 @@ opentelemetry-api = ">=1.12,<2.0"
 opentelemetry-instrumentation = "0.60b1"
 
 [[package]]
+name = "opentelemetry-instrumentation-openai"
+version = "0.53.0"
+description = "OpenTelemetry OpenAI instrumentation"
+optional = false
+python-versions = "<4,>=3.10"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_openai-0.53.0-py3-none-any.whl", hash = "sha256:91d9f69673636f5f7d50e5a4782e4526d6df3a1ddfd6ac2d9e15a957f8fd9ad8"},
+    {file = "opentelemetry_instrumentation_openai-0.53.0.tar.gz", hash = "sha256:c0cd83d223d138309af3cc5f53c9c6d22136374bfa00e8f66dff31cd322ef547"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.38.0,<2"
+opentelemetry-instrumentation = ">=0.59b0"
+opentelemetry-semantic-conventions = ">=0.59b0"
+opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
+
+[package.extras]
+instruments = ["openai"]
+
+[[package]]
 name = "opentelemetry-instrumentation-requests"
 version = "0.60b1"
 description = "OpenTelemetry requests instrumentation"
@@ -2176,4 +2197,4 @@ full = ["opentelemetry-instrumentation-httpx", "opentelemetry-instrumentation-lo
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "ee022f1d76a0bca17205290044619783a0414d0adc451473c217bbbd9471e334"
+content-hash = "c4604de53a479477a00708656d45be26d6df1cbed1b82e9b355ccd4c3e935415"
