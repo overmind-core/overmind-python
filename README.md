@@ -1,36 +1,31 @@
-# Overmind Python SDK
+# Overmind SDK
 
 [![CI Checks](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml/badge.svg)](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml)
-[![PyPI version](https://img.shields.io/pypi/v/overmind.svg)](https://pypi.org/project/overmind/)
+[![PyPI version](https://img.shields.io/pypi/v/overmind-sdk.svg)](https://pypi.org/project/overmind-sdk/)
 
-Automatic observability for LLM applications. One call to `overmind.init()` instruments your existing OpenAI, Anthropic, Google Gemini, or Agno code — no proxy, no key sharing, no import changes.
+Automatic observability for LLM applications. One call to `init()` instruments your existing OpenAI, Anthropic, Google Gemini, or Agno code — no proxy, no key sharing, no import changes.
 
-## What is Overmind?
-
-Overmind automatically optimizes your AI agents — better prompts, better models, lower cost. It collects execution traces, evaluates them with LLM judges, and recommends better prompts and models to reduce cost, improve quality, and lower latency.
+## Features
 
 - **Zero-change instrumentation**: Keep using your existing LLM clients as-is
 - **Auto-detection**: Detects installed providers automatically, or specify them explicitly
 - **Custom spans**: Add your own tracing spans alongside LLM calls
 - **User & tag context**: Tag traces with user IDs, custom attributes, and exceptions
 - **OpenTelemetry native**: Built on standard OTLP — works with any OTel-compatible backend
-- **Managed service**: [console.overmindlab.ai](https://console.overmindlab.ai)
-- **Self-hosted (open-source)**: [github.com/overmind-core/overmind](https://github.com/overmind-core/overmind)
-- **Docs**: [docs.overmindlab.ai](https://docs.overmindlab.ai)
 
 ## Installation
 
 ```bash
-pip install overmind
+pip install overmind-sdk
 ```
 
 Install alongside your LLM provider package:
 
 ```bash
-pip install overmind openai          # OpenAI
-pip install overmind anthropic       # Anthropic
-pip install overmind google-genai    # Google Gemini
-pip install overmind agno            # Agno
+pip install overmind-sdk openai          # OpenAI
+pip install overmind-sdk anthropic       # Anthropic
+pip install overmind-sdk google-genai    # Google Gemini
+pip install overmind-sdk agno            # Agno
 ```
 
 ---
@@ -43,12 +38,12 @@ Sign up at [console.overmindlab.ai](https://console.overmindlab.ai) — your API
 
 ### 2. Initialize the SDK
 
-Call `overmind.init()` once at application startup, before any LLM calls:
+Call `init()` once at application startup, before any LLM calls:
 
 ```python
-import overmind
+from overmind_sdk import init
 
-overmind.init(
+init(
     overmind_api_key="ovr_...",    # or set OVERMIND_API_KEY env var
     service_name="my-service",
     environment="production",
@@ -65,7 +60,7 @@ from openai import OpenAI
 client = OpenAI()  # your existing client, unchanged
 
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-4o",
     messages=[{"role": "user", "content": "Explain quantum computing"}],
 )
 print(response.choices[0].message.content)
@@ -80,14 +75,14 @@ Traces appear in your [Overmind dashboard](https://console.overmindlab.ai) in re
 ### OpenAI
 
 ```python
-import overmind
+from overmind_sdk import init
 from openai import OpenAI
 
-overmind.init(service_name="my-service", providers=["openai"])
+init(service_name="my-service", providers=["openai"])
 
 client = OpenAI()
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-4o",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
@@ -95,14 +90,14 @@ response = client.chat.completions.create(
 ### Anthropic
 
 ```python
-import overmind
+from overmind_sdk import init
 import anthropic
 
-overmind.init(service_name="my-service", providers=["anthropic"])
+init(service_name="my-service", providers=["anthropic"])
 
 client = anthropic.Anthropic()
 message = client.messages.create(
-    model="claude-haiku-4-5",
+    model="claude-opus-4-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
@@ -111,10 +106,10 @@ message = client.messages.create(
 ### Google Gemini
 
 ```python
-import overmind
+from overmind_sdk import init
 from google import genai
 
-overmind.init(service_name="my-service", providers=["google"])
+init(service_name="my-service", providers=["google"])
 
 client = genai.Client()
 response = client.models.generate_content(
@@ -126,39 +121,39 @@ response = client.models.generate_content(
 ### Agno
 
 ```python
-import overmind
+from overmind_sdk import init
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
-overmind.init(service_name="my-service", providers=["agno"])
+init(service_name="my-service", providers=["agno"])
 
-agent = Agent(model=OpenAIChat(id="gpt-4o-mini"), markdown=True, name="Storyteller")
+agent = Agent(model=OpenAIChat(id="gpt-4o"), markdown=True)
 agent.print_response("Write a short poem about the sea.")
 ```
 
 ### Auto-detect all installed providers
 
-Omit `providers` (or pass an empty list) to automatically instrument every supported provider that is installed:
+Pass an empty `providers` list (or omit it) to automatically instrument every supported provider that is installed:
 
 ```python
-import overmind
+from overmind_sdk import init
 
-overmind.init(service_name="my-service")  # auto-detects openai, anthropic, google, agno
+init(service_name="my-service")  # auto-detects openai, anthropic, google, agno
 ```
 
 ---
 
 ## Configuration
 
-### `overmind.init()` parameters
+### `init()` parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `overmind_api_key` | `str \| None` | `None` | Your Overmind API key. Falls back to `OVERMIND_API_KEY` env var. |
-| `service_name` | `str` | `"unknown-service"` | Name of your service (shown in traces). Also reads `OVERMIND_SERVICE_NAME`. |
-| `environment` | `str` | `"development"` | Deployment environment (`"production"`, `"staging"`, etc.). Also reads `OVERMIND_ENVIRONMENT`. |
-| `providers` | `list[str] \| None` | `None` | Providers to instrument. Supported: `"openai"`, `"anthropic"`, `"google"`, `"agno"`. `None` or `[]` = auto-detect all installed. |
-| `overmind_base_url` | `str \| None` | `None` | Override the Overmind API URL. Falls back to `OVERMIND_API_URL` or `https://api.overmindlab.ai`. |
+| `service_name` | `str \| None` | `None` | Name of your service (shown in traces). Also reads `OVERMIND_SERVICE_NAME`. Defaults to `"unknown-service"`. |
+| `environment` | `str \| None` | `None` | Deployment environment (`"production"`, `"staging"`, etc.). Also reads `OVERMIND_ENVIRONMENT`. Defaults to `"development"`. |
+| `providers` | `list[str] \| None` | `None` | Providers to instrument. Supported: `"openai"`, `"anthropic"`, `"google"`, `"agno"`. `None` or empty = auto-detect. |
+| `overmind_base_url` | `str \| None` | `None` | Override the Overmind API URL. Falls back to `OVERMIND_API_URL` env var, then `https://api.overmindlab.ai`. |
 
 ### Environment variables
 
@@ -169,42 +164,38 @@ overmind.init(service_name="my-service")  # auto-detects openai, anthropic, goog
 | `OVERMIND_ENVIRONMENT` | Environment name (overridden by `environment` param) |
 | `OVERMIND_API_URL` | Custom API endpoint URL |
 
-### Self-Hosted
-
-The SDK works with both the managed service and the [self-hosted open-source edition](https://github.com/overmind-core/overmind). API keys prefixed with `ovr_core_` are automatically routed to `http://localhost:8000`. You can also set `OVERMIND_API_URL` to point to your own deployment.
-
 ---
 
 ## Additional SDK Functions
 
-### `overmind.get_tracer()`
+### `get_tracer()`
 
 Get the OpenTelemetry tracer to create custom spans around any block of code:
 
 ```python
-import overmind
+from overmind_sdk import init, get_tracer
 
-overmind.init(service_name="my-service")
+init(service_name="my-service")
 
-tracer = overmind.get_tracer()
+tracer = get_tracer()
 
 with tracer.start_as_current_span("process-document") as span:
     span.set_attribute("document.id", doc_id)
     result = process(doc)
 ```
 
-### `overmind.set_user()`
+### `set_user()`
 
 Tag the current trace with user identity. Call this in your request handler or middleware:
 
 ```python
-import overmind
+from overmind_sdk import set_user
 
 # In a FastAPI middleware:
 @app.middleware("http")
 async def add_user_context(request: Request, call_next):
     if request.state.user:
-        overmind.set_user(
+        set_user(
             user_id=request.state.user.id,
             email=request.state.user.email,
         )
@@ -217,24 +208,28 @@ async def add_user_context(request: Request, call_next):
 | `email` | No | User's email address |
 | `username` | No | User's display name |
 
-### `overmind.set_tag()`
+### `set_tag()`
 
 Add a custom attribute to the current span:
 
 ```python
-overmind.set_tag("feature.flag", "new-checkout-flow")
-overmind.set_tag("tenant.id", tenant_id)
+from overmind_sdk import set_tag
+
+set_tag("feature.flag", "new-checkout-flow")
+set_tag("tenant.id", tenant_id)
 ```
 
-### `overmind.capture_exception()`
+### `capture_exception()`
 
 Record an exception on the current span and mark it as an error:
 
 ```python
+from overmind_sdk import capture_exception
+
 try:
     result = risky_llm_call()
 except Exception as e:
-    overmind.capture_exception(e)
+    capture_exception(e)
     raise
 ```
 
@@ -244,12 +239,12 @@ except Exception as e:
 
 ```python
 import os
-import overmind
+from overmind_sdk import init, get_tracer, set_user, set_tag, capture_exception
 from openai import OpenAI
 
 os.environ["OVERMIND_API_KEY"] = "ovr_your_key_here"
 
-overmind.init(
+init(
     service_name="customer-support",
     environment="production",
     providers=["openai"],
@@ -258,13 +253,14 @@ overmind.init(
 client = OpenAI()
 
 def handle_query(user_id: str, question: str) -> str:
-    overmind.set_user(user_id=user_id)
+    set_user(user_id=user_id)
+    set_tag("workflow", "support")
 
-    tracer = overmind.get_tracer()
+    tracer = get_tracer()
     with tracer.start_as_current_span("handle-support-query"):
         try:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a helpful customer support agent."},
                     {"role": "user", "content": question},
@@ -272,7 +268,7 @@ def handle_query(user_id: str, question: str) -> str:
             )
             return response.choices[0].message.content
         except Exception as e:
-            overmind.capture_exception(e)
+            capture_exception(e)
             raise
 
 answer = handle_query("user-123", "How do I reset my password?")
@@ -283,7 +279,7 @@ print(answer)
 
 ## What Happens After Your First Traces
 
-Once Overmind has collected 30+ traces for a given prompt pattern, the optimization engine starts automatically:
+Once Overmind has collected 10+ traces for a given prompt pattern, the optimization engine starts automatically:
 
 1. **Agent detection** — extracts prompt templates from your traces
 2. **LLM judge scoring** — evaluates each trace against auto-generated quality criteria
@@ -292,19 +288,6 @@ Once Overmind has collected 30+ traces for a given prompt pattern, the optimizat
 5. **Suggestions** — surfaces the best alternatives in your dashboard
 
 See [How Optimization Works](https://docs.overmindlab.ai/guides/how-it-works) for details.
-
----
-
-## Documentation
-
-- [Full documentation](https://docs.overmindlab.ai)
-- [Python SDK reference](https://docs.overmindlab.ai/guides/sdk-reference)
-- [JavaScript/TypeScript SDK](https://docs.overmindlab.ai/guides/sdk-js)
-- [Self-hosted platform (OSS)](https://github.com/overmind-core/overmind)
-
-## License
-
-MIT
 
 ---
 
