@@ -14,13 +14,13 @@ class TestModels:
         """Test AgentCreateRequest model."""
         agent_data = {
             "agent_id": "test_agent",
-            "agent_model": "gpt-4o",
+            "agent_model": "gpt-5-mini",
             "agent_description": "Test agent",
         }
 
         agent = AgentCreateRequest(**agent_data)
         assert agent.agent_id == "test_agent"
-        assert agent.agent_model == "gpt-4o"
+        assert agent.agent_model == "gpt-5-mini"
         assert agent.agent_description == "Test agent"
         assert agent.input_policies == []
         assert agent.output_policies == []
@@ -29,7 +29,7 @@ class TestModels:
         """Test AgentCreateRequest model with policies."""
         agent_data = {
             "agent_id": "test_agent",
-            "agent_model": "gpt-4o",
+            "agent_model": "gpt-5-mini",
             "agent_description": "Test agent",
             "input_policies": ["policy1", "policy2"],
             "output_policies": ["policy3"],

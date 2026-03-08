@@ -87,7 +87,7 @@ class TestClientIntegration:
         result = self.client.invoke(
             client_path="openai.chat.completions.create",
             client_call_params={
-                "model": "gpt-4o",
+                "model": "gpt-5",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
         )

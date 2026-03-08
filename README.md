@@ -60,7 +60,7 @@ from openai import OpenAI
 client = OpenAI()  # your existing client, unchanged
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5-mini",
     messages=[{"role": "user", "content": "Explain quantum computing"}],
 )
 print(response.choices[0].message.content)
@@ -82,7 +82,7 @@ init(service_name="my-service", providers=["openai"])
 
 client = OpenAI()
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
@@ -127,7 +127,7 @@ from agno.models.openai import OpenAIChat
 
 init(service_name="my-service", providers=["agno"])
 
-agent = Agent(model=OpenAIChat(id="gpt-4o"), markdown=True)
+agent = Agent(model=OpenAIChat(id="gpt-5"), markdown=True)
 agent.print_response("Write a short poem about the sea.")
 ```
 
@@ -260,7 +260,7 @@ def handle_query(user_id: str, question: str) -> str:
     with tracer.start_as_current_span("handle-support-query"):
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5-mini",
                 messages=[
                     {"role": "system", "content": "You are a helpful customer support agent."},
                     {"role": "user", "content": question},
