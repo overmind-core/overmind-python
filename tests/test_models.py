@@ -4,7 +4,7 @@ Tests for Pydantic models.
 
 import pytest
 
-from overmind.models import AgentCreateRequest, PolicyCreateRequest
+from overmind_sdk.models import AgentCreateRequest, PolicyCreateRequest
 
 
 class TestModels:

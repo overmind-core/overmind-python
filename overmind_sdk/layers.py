@@ -1,5 +1,5 @@
-from overmind.client import get_layers_client, OvermindLayersClient
-from overmind.models import LayerResponse
+from overmind_sdk.client import get_layers_client, OvermindLayersClient
+from overmind_sdk.models import LayerResponse
 from typing import Sequence
 
 

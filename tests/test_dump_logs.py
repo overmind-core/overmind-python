@@ -2,7 +2,7 @@ import pytest
 import os
 import unittest
 from unittest.mock import MagicMock
-from overmind.utils.dump_logs import ingest_logs
+from overmind_sdk.utils.dump_logs import ingest_logs
 
 
 current_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -20,12 +20,8 @@ def test_dump_logs(init_mock: MagicMock, mock_get_tracer: MagicMock, filepath):
 
 @unittest.mock.patch("overmind.utils.dump_logs.get_tracer")
 @unittest.mock.patch("overmind.utils.dump_logs.init")
-@pytest.mark.parametrize(
-    "filepath", ["logs_mapped.jsonl", "logs_mapped.json", "logs_mapped.csv"]
-)
-def test_dump_logs_with_mapping(
-    init_mock: MagicMock, mock_get_tracer: MagicMock, filepath
-):
+@pytest.mark.parametrize("filepath", ["logs_mapped.jsonl", "logs_mapped.json", "logs_mapped.csv"])
+def test_dump_logs_with_mapping(init_mock: MagicMock, mock_get_tracer: MagicMock, filepath):
     init_mock.return_value = None
     ingest_logs(
         os.path.join(current_dir, filepath),

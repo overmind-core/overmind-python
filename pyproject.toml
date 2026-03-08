@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "overmind"
+name = "overmind-sdk"
 version = "0.1.31"
 description = "Python client for Overmind API"
 authors = ["Overmind Ltd"]
 readme = "README.md"
-packages = [{include = "overmind"}]
+packages = [{include = "overmind_sdk"}]
 homepage = "https://github.com/overmind-core/overmind-python"
 repository = "https://github.com/overmind-core/overmind-python"
 keywords = ["overmind", "ai", "api", "client", "policy", "enforcement"]

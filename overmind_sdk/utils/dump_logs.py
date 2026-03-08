@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 import json
 from pathlib import Path
-from overmind.overmind_sdk import init, get_tracer
+from overmind_sdk.tracing import init, get_tracer
 from tqdm import tqdm
 from opentelemetry import trace
 from typing import Dict, Optional
@@ -25,15 +25,9 @@ def get_log_item_model(mapping: Dict[str, str] = None):
         end_time: int = Field(..., alias=get_field("end_time"))
 
         # custom IDs (must be valid 32/16 hex chars)
-        trace_state: Optional[str] = Field(
-            default=None, alias=get_field("trace_state"), max_length=32, min_length=16
-        )
-        trace_id: Optional[str] = Field(
-            default=None, alias=get_field("trace_id"), max_length=32, min_length=16
-        )
-        span_id: Optional[str] = Field(
-            default=None, alias=get_field("span_id"), max_length=32, min_length=16
-        )
+        trace_state: Optional[str] = Field(default=None, alias=get_field("trace_state"), max_length=32, min_length=16)
+        trace_id: Optional[str] = Field(default=None, alias=get_field("trace_id"), max_length=32, min_length=16)
+        span_id: Optional[str] = Field(default=None, alias=get_field("span_id"), max_length=32, min_length=16)
         parent_span_id: Optional[str] = Field(
             default=None,
             alias=get_field("parent_span_id"),
@@ -41,16 +35,12 @@ def get_log_item_model(mapping: Dict[str, str] = None):
             min_length=16,
         )
 
-        name: Optional[str] = Field(
-            default="log-ingestion-service", alias=get_field("name")
-        )
+        name: Optional[str] = Field(default="log-ingestion-service", alias=get_field("name"))
         kind: int = Field(default=2, alias=get_field("kind"))
 
         status_code: int = Field(default=0, alias=get_field("status_code"))
         status_message: str = Field(default="", alias=get_field("status_message"))
-        extra_attributes: Dict[str, str] = Field(
-            ..., default_factory=dict, alias=get_field("extra_attributes")
-        )
+        extra_attributes: Dict[str, str] = Field(..., default_factory=dict, alias=get_field("extra_attributes"))
 
         model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
