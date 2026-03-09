@@ -7,11 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overmind import OvermindClient
-from overmind.exceptions import (
+from overmind_sdk import OvermindClient
+from overmind_sdk.exceptions import (
     OvermindAPIError,
     OvermindAuthenticationError,
-    OvermindError,
 )
 
 
@@ -63,9 +62,7 @@ class TestOvermindClient:
             "processed_output": "test output",
             "span_context": {},
         }
-        mock_response.content = (
-            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
-        )
+        mock_response.content = b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
         mock_request.return_value = mock_response
 
         # Call the provider through dynamic access
@@ -134,9 +131,7 @@ class TestOvermindClient:
             "processed_output": "test output",
             "span_context": {},
         }
-        mock_response.content = (
-            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
-        )
+        mock_response.content = b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
         mock_request.return_value = mock_response
 
         result = self.client.invoke(
@@ -164,9 +159,7 @@ class TestOvermindClient:
             "processed_output": "test output",
             "span_context": {},
         }
-        mock_response.content = (
-            b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
-        )
+        mock_response.content = b'{"llm_client_response": {"choices": [{"message": {"content": "Hello"}}]}}'
         mock_request.return_value = mock_response
 
         custom_init_params = {"api_key": "custom_key"}

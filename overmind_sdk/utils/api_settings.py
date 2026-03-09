@@ -1,5 +1,5 @@
 import os
-from overmind.client import OvermindError
+from overmind_sdk.client import OvermindError
 
 LOCAL_API_KEY_PREFIX = "ovr_core_"
 LOCAL_BASE_URL = "http://localhost:8000"

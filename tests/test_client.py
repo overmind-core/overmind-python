@@ -6,13 +6,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overmind import OvermindClient
-from overmind.exceptions import (
+from overmind_sdk import OvermindClient
+from overmind_sdk.exceptions import (
     OvermindAPIError,
     OvermindAuthenticationError,
     OvermindError,
 )
-from overmind.models import AgentCreateRequest, PolicyCreateRequest
+from overmind_sdk.models import AgentCreateRequest, PolicyCreateRequest
 
 
 class TestClientIntegration:
@@ -60,9 +60,7 @@ class TestClientIntegration:
             Mock(
                 status_code=200,
                 json=lambda: {
-                    "llm_client_response": {
-                        "choices": [{"message": {"content": "Hello"}}]
-                    },
+                    "llm_client_response": {"choices": [{"message": {"content": "Hello"}}]},
                     "input_layer_results": {},
                     "output_layer_results": {},
                     "processed_input": "test input",
@@ -89,7 +87,7 @@ class TestClientIntegration:
         result = self.client.invoke(
             client_path="openai.chat.completions.create",
             client_call_params={
-                "model": "gpt-4o",
+                "model": "gpt-5",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
         )

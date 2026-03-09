@@ -8,12 +8,12 @@ from opentelemetry.sdk.resources import Resource
 import importlib.metadata
 import importlib.util
 
-from overmind.utils.api_settings import get_api_settings
+from overmind_sdk.utils.api_settings import get_api_settings
 
 logger = logging.getLogger(__name__)
 
 try:
-    _SDK_VERSION = importlib.metadata.version("overmind")
+    _SDK_VERSION = importlib.metadata.version("overmind_sdk")
 except importlib.metadata.PackageNotFoundError:
     _SDK_VERSION = "unknown"
 

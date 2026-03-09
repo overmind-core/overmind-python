@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overmind import OvermindClient
+from overmind_sdk import OvermindClient
 
 
 class TestPoliciesClient:

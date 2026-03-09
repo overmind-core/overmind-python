@@ -4,11 +4,9 @@ Pydantic models for the Overmind client.
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import pprint
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 from .utils.formatters import summarize_proxy_run
 from rich.console import Console
-from rich.pretty import Pretty
 import io
 
 
@@ -32,22 +30,12 @@ class AgentCreateRequest(ReadableBaseModel):
     """Model for creating a new agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
-    agent_model: Optional[str] = Field(
-        None, description="The AI model to use (e.g., 'gpt-4o')"
-    )
-    agent_description: Optional[str] = Field(
-        None, description="Description of the agent"
-    )
-    input_policies: Optional[List[str]] = Field(
-        default=[], description="List of input policy IDs"
-    )
-    output_policies: Optional[List[str]] = Field(
-        default=[], description="List of output policy IDs"
-    )
+    agent_model: Optional[str] = Field(None, description="The AI model to use (e.g., 'gpt-5-mini')")
+    agent_description: Optional[str] = Field(None, description="Description of the agent")
+    input_policies: Optional[List[str]] = Field(default=[], description="List of input policy IDs")
+    output_policies: Optional[List[str]] = Field(default=[], description="List of output policy IDs")
     stats: Optional[Dict[str, Any]] = Field(default={}, description="Agent statistics")
-    parameters: Optional[Dict[str, Any]] = Field(
-        default={}, description="Agent parameters"
-    )
+    parameters: Optional[Dict[str, Any]] = Field(default={}, description="Agent parameters")
 
 
 class AgentUpdateRequest(ReadableBaseModel):
@@ -55,15 +43,9 @@ class AgentUpdateRequest(ReadableBaseModel):
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
     agent_model: Optional[str] = Field(None, description="The AI model to use")
-    agent_description: Optional[str] = Field(
-        None, description="Description of the agent"
-    )
-    input_policies: Optional[List[str]] = Field(
-        None, description="List of input policy IDs"
-    )
-    output_policies: Optional[List[str]] = Field(
-        None, description="List of output policy IDs"
-    )
+    agent_description: Optional[str] = Field(None, description="Description of the agent")
+    input_policies: Optional[List[str]] = Field(None, description="List of input policy IDs")
+    output_policies: Optional[List[str]] = Field(None, description="List of output policy IDs")
     stats: Optional[Dict[str, Any]] = Field(None, description="Agent statistics")
     parameters: Optional[Dict[str, Any]] = Field(None, description="Agent parameters")
 
@@ -98,9 +80,7 @@ class PolicyCreateRequest(ReadableBaseModel):
     def validate_policy_type(self):
         """Ensure at least one of is_input_policy or is_output_policy is True."""
         if not self.is_input_policy and not self.is_output_policy:
-            raise ValueError(
-                "At least one of is_input_policy or is_output_policy must be True"
-            )
+            raise ValueError("At least one of is_input_policy or is_output_policy must be True")
         return self
 
 
@@ -108,17 +88,11 @@ class PolicyUpdateRequest(ReadableBaseModel):
     """Model for updating an existing policy."""
 
     policy_id: str = Field(..., description="Unique identifier for the policy")
-    policy_description: Optional[str] = Field(
-        None, description="Description of the policy"
-    )
+    policy_description: Optional[str] = Field(None, description="Description of the policy")
     parameters: Optional[Dict[str, Any]] = Field(None, description="Policy parameters")
     policy_template: Optional[str] = Field(None, description="Policy template")
-    is_input_policy: Optional[bool] = Field(
-        None, description="Whether this is an input policy"
-    )
-    is_output_policy: Optional[bool] = Field(
-        None, description="Whether this is an output policy"
-    )
+    is_input_policy: Optional[bool] = Field(None, description="Whether this is an input policy")
+    is_output_policy: Optional[bool] = Field(None, description="Whether this is an output policy")
     stats: Optional[Dict[str, Any]] = Field(None, description="Policy statistics")
 
 

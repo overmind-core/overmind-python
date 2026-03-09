@@ -8,8 +8,8 @@ from langgraph.graph import StateGraph
 from typing import Optional
 import hashlib
 import json
-from overmind.utils.api_settings import get_api_settings
-from overmind.utils.serializers import serialize
+from overmind_sdk.utils.api_settings import get_api_settings
+from overmind_sdk.utils.serializers import serialize
 
 
 class OvermindObservabilityCallback(BaseCallbackHandler):

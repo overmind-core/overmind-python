@@ -5,7 +5,7 @@ Shared pytest fixtures and configuration.
 import pytest
 from unittest.mock import Mock
 
-from overmind import OvermindClient
+from overmind_sdk import OvermindClient
 
 
 @pytest.fixture
