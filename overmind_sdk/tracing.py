@@ -126,6 +126,24 @@ def enable_tracing(providers: list[str]):
         enable_google_genai()
 
 
+def _span_processor_on_start(span: trace.Span, parent_context: trace.Context | None = None):
+    # from traceloop.sdk.tracing.tracing import default_span_processor_on_start
+    if value := get_value("prompt_key"):
+        span.set_attribute(SpanAttributes.TRACELOOP_PROMPT_KEY, str(value))
+
+    if value := get_value("prompt_version"):
+        span.set_attribute(SpanAttributes.TRACELOOP_PROMPT_VERSION, str(value))
+
+    if value := get_value("prompt_version_hash"):
+        span.set_attribute(SpanAttributes.TRACELOOP_PROMPT_VERSION_HASH, str(value))
+
+    if value := get_value("prompt_managed"):
+        span.set_attribute(SpanAttributes.TRACELOOP_PROMPT_MANAGED, False)
+
+    if value := get_value("prompt_template_variables"):
+        span.set_attribute(SpanAttributes.TRACELOOP_PROMPT_TEMPLATE_VARIABLES, str(value))
+
+
 def init(
     overmind_api_key: str | None = None,
     *,
