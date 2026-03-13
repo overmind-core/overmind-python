@@ -1007,7 +1007,7 @@ develop = false
 type = "git"
 url = "https://github.com/overmind-core/openllmetry.git"
 reference = "HEAD"
-resolved_reference = "0b9c603b99a12f7385909176d65d9aea4f73892d"
+resolved_reference = "0ee4987118c22293e18831066a34c3e3a49d12ba"
 subdirectory = "packages/opentelemetry-overmind"
 
 [[package]]
