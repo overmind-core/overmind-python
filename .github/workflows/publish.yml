@@ -1,6 +1,9 @@
 name: Build and Publish
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -47,3 +50,5 @@ jobs:
 
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
