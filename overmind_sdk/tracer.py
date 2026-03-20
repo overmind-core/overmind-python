@@ -5,13 +5,14 @@ This module provides a decorator that automatically traces function calls,
 capturing inputs and outputs in OpenTelemetry style.
 """
 
-import functools
+from functools import wraps
 import inspect
 from typing import Any, Callable, Optional
+from opentelemetry.context import attach, set_value
 from opentelemetry.trace import Status, StatusCode
 
-from overmind.overmind_sdk import get_tracer
-from overmind.utils.serializers import serialize
+from overmind_sdk.tracing import get_tracer
+from overmind_sdk.utils.serializers import serialize
 
 
 def _prepare_for_otel(value: Any) -> Any:
@@ -39,7 +40,7 @@ def _prepare_for_otel(value: Any) -> Any:
     return str(value)
 
 
-def trace_function(span_name: Optional[str] = None):
+def trace_function(span_name: Optional[str] = None, type: str = "function"):
     """
     Decorator that automatically traces function execution with OpenTelemetry.
 
@@ -48,6 +49,7 @@ def trace_function(span_name: Optional[str] = None):
 
     Args:
         span_name: Optional name for the span. If not provided, uses the function name.
+        type: type of the span. Can be "function", "workflow", "tool", "knowledge_base"
 
     Example:
         ```python
@@ -77,7 +79,7 @@ def trace_function(span_name: Optional[str] = None):
 
         if is_async:
 
-            @functools.wraps(func)
+            @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 tracer = get_tracer()
 
@@ -133,7 +135,7 @@ def trace_function(span_name: Optional[str] = None):
             return async_wrapper
         else:
 
-            @functools.wraps(func)
+            @wraps(func)
             def sync_wrapper(*args, **kwargs):
                 tracer = get_tracer()
 
@@ -187,5 +189,101 @@ def trace_function(span_name: Optional[str] = None):
                         raise
 
             return sync_wrapper
+
+    return decorator
+
+
+def set_workflow_name(workflow_name: str) -> None:
+    attach(set_value("workflow_name", workflow_name))
+
+
+def set_agent_name(agent_name: str) -> None:
+    attach(set_value("agent_name", agent_name))
+
+
+def set_conversation_id(conversation_id: str):
+    """
+    Set the conversation ID for the current context.
+    """
+    attach(set_value("conversation_id", conversation_id))
+
+
+def conversation(conversation_id: str):
+    """
+    Decorator that automatically traces a conversation with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        if inspect.iscoroutinefunction(fn):
+
+            @wraps(fn)
+            async def async_wrapper(*args, **kwargs):
+                set_conversation_id(conversation_id)
+                return await fn(*args, **kwargs)
+
+            return async_wrapper
+        else:
+
+            @wraps(fn)
+            def sync_wrapper(*args, **kwargs):
+                set_conversation_id(conversation_id)
+                return fn(*args, **kwargs)
+
+            return sync_wrapper
+
+    return decorator
+
+
+def task(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+    """
+    Decorator that automatically traces a task with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        return trace_function(span_name=f"task.{name}", type="task")
+
+    return decorator
+
+
+def workflow(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+    """
+    Decorator that automatically traces a workflow with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        return trace_function(span_name=f"workflow.{name}", type="workflow")
+
+    return decorator
+
+
+def agent(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+    """
+    Decorator that automatically traces an agent with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        return trace_function(span_name=f"agent.{name}", type="agent")
+
+    return decorator
+
+
+def tool(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+    """
+    Decorator that automatically traces a tool with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        return trace_function(span_name=f"tool.{name}", type="tool")
+
+    return decorator
+
+
+def knowledge_base(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+    """
+    Decorator that automatically traces a knowledge base with OpenTelemetry.
+    """
+
+    def decorator(fn: Callable) -> Callable:
+        return trace_function(span_name=f"knowledge_base.{name}", type="knowledge_base")
 
     return decorator
