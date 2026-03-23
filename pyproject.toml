@@ -42,11 +42,11 @@ opentelemetry-instrumentation-requests = "^0.60b1"
 opentelemetry-instrumentation-httpx = "^0.60b1"
 opentelemetry-instrumentation-logging = "^0.60b1"
 tqdm = "^4.67.3"
-opentelemetry-instrumentation-anthropic = { git = "https://github.com/overmind-core/openllmetry.git", subdirectory = "packages/opentelemetry-instrumentation-anthropic" }
-opentelemetry-instrumentation-google-generativeai = { git = "https://github.com/overmind-core/openllmetry.git", subdirectory = "packages/opentelemetry-instrumentation-google-generativeai" }
-opentelemetry-instrumentation-agno = "^0.52.6"
-opentelemetry-instrumentation-openai = { git = "https://github.com/overmind-core/openllmetry.git", subdirectory = "packages/opentelemetry-instrumentation-openai" }
-opentelemetry-overmind = { git = "https://github.com/overmind-core/openllmetry.git", subdirectory = "packages/opentelemetry-overmind" }
+overmind-instrumentation-anthropic = "^0.53.0"
+overmind-instrumentation-google-generativeai = "^0.53.0"
+overmind-instrumentation-agno = "^0.53.0"
+overmind-instrumentation-openai = "^0.53.1"
+opentelemetry-overmind = "^0.53.0"
 
 [tool.poetry.extras]
 full = [
