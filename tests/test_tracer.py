@@ -4,7 +4,7 @@ Unit tests for the observe decorator.
 
 import pytest
 from unittest.mock import MagicMock, patch
-from opentelemetry.trace import Status, StatusCode
+from opentelemetry.trace import StatusCode
 from overmind_sdk.tracer import observe
 
 @pytest.fixture(autouse=True)
@@ -35,7 +35,6 @@ def mock_tracer():
 def test_observe_sync_basic(mock_tracer):
     """Test basic synchronous function tracing."""
 
-
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
@@ -48,8 +47,9 @@ def test_observe_sync_basic(mock_tracer):
 
         assert result == 8
         mock_tracer_obj.start_as_current_span.assert_called_once_with("add_numbers")
-        assert mock_span.set_attribute.call_count >= 2  # inputs and outputs
-        mock_span.set_status.assert_called_once_with(Status(StatusCode.OK))
+        assert mock_span.set_attribute.call_count >= 2
+        mock_span.set_status.assert_called_once()
+        assert mock_span.set_status.call_args[0][0].status_code == StatusCode.OK
 
 
 def test_observe_with_custom_span_name(mock_tracer):
@@ -138,7 +138,6 @@ def test_observe_async(mock_tracer):
     """Test async function tracing."""
     import asyncio
 
-
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
@@ -152,7 +151,8 @@ def test_observe_async(mock_tracer):
 
         assert result == 30
         mock_tracer_obj.start_as_current_span.assert_called_once_with("async_operation")
-        mock_span.set_status.assert_called_once_with(Status(StatusCode.OK))
+        mock_span.set_status.assert_called_once()
+        assert mock_span.set_status.call_args[0][0].status_code == StatusCode.OK
 
 
 def test_observe_async_with_exception(mock_tracer):
