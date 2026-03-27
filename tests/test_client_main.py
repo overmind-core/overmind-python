@@ -166,7 +166,7 @@ class TestOvermindClient:
         result = self.client.invoke(
             client_path="openai.chat.completions.create",
             client_call_params={
-                "model": "gpt-4o",
+                "model": "gpt-5-mini",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             agent_id="test_agent",
