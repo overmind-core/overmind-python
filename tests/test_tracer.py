@@ -3,20 +3,20 @@ Unit tests for the observe decorator.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 from opentelemetry.trace import Status, StatusCode
-
+from overmind_sdk.tracer import observe
 
 @pytest.fixture(autouse=True)
 def reset_sdk_state():
     """Reset SDK state before each test."""
-    import overmind.overmind_sdk as sdk
+    import overmind_sdk.tracing as tracing
 
-    sdk._initialized = False
-    sdk._tracer = None
+    tracing._initialized = False
+    tracing._tracer = None
     yield
-    sdk._initialized = False
-    sdk._tracer = None
+    tracing._initialized = False
+    tracing._tracer = None
 
 
 @pytest.fixture
@@ -34,11 +34,11 @@ def mock_tracer():
 
 def test_observe_sync_basic(mock_tracer):
     """Test basic synchronous function tracing."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def add_numbers(a: int, b: int):
@@ -54,11 +54,11 @@ def test_observe_sync_basic(mock_tracer):
 
 def test_observe_with_custom_span_name(mock_tracer):
     """Test decorator with custom span name."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe(span_name="custom_operation")
         def my_function(x: int):
@@ -72,11 +72,11 @@ def test_observe_with_custom_span_name(mock_tracer):
 
 def test_observe_captures_inputs(mock_tracer):
     """Test that function inputs are captured."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def process_data(name: str, age: int, metadata: dict):
@@ -91,11 +91,11 @@ def test_observe_captures_inputs(mock_tracer):
 
 def test_observe_captures_outputs(mock_tracer):
     """Test that function outputs are captured."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def get_result():
@@ -111,11 +111,11 @@ def test_observe_captures_outputs(mock_tracer):
 
 def test_observe_handles_exceptions(mock_tracer):
     """Test that exceptions are properly recorded."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def failing_function():
@@ -137,11 +137,11 @@ def test_observe_handles_exceptions(mock_tracer):
 def test_observe_async(mock_tracer):
     """Test async function tracing."""
     import asyncio
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe(span_name="async_operation")
         async def async_add(a: int, b: int):
@@ -158,11 +158,11 @@ def test_observe_async(mock_tracer):
 def test_observe_async_with_exception(mock_tracer):
     """Test async function exception handling."""
     import asyncio
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         async def async_fail():
@@ -179,11 +179,11 @@ def test_observe_async_with_exception(mock_tracer):
 
 def test_observe_with_kwargs(mock_tracer):
     """Test function with keyword arguments."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def greet(name: str, greeting: str = "Hello"):
@@ -197,11 +197,11 @@ def test_observe_with_kwargs(mock_tracer):
 
 def test_observe_preserves_function_metadata(mock_tracer):
     """Test that function metadata is preserved."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def documented_function(param: int) -> int:
@@ -214,11 +214,11 @@ def test_observe_preserves_function_metadata(mock_tracer):
 
 def test_observe_with_complex_types(mock_tracer):
     """Test tracing with complex data types."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def process_complex(data: dict, items: list):
@@ -232,11 +232,11 @@ def test_observe_with_complex_types(mock_tracer):
 
 def test_observe_with_no_args(mock_tracer):
     """Test function with no arguments."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def get_constant():
@@ -250,11 +250,11 @@ def test_observe_with_no_args(mock_tracer):
 
 def test_observe_with_positional_only_args(mock_tracer):
     """Test function with positional arguments."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         @observe()
         def multiply(x, y):
@@ -268,11 +268,11 @@ def test_observe_with_positional_only_args(mock_tracer):
 
 def test_observe_skips_self_in_class_method(mock_tracer):
     """Test that self is not captured for instance methods."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         class TestClass:
             def __init__(self):
@@ -296,11 +296,11 @@ def test_observe_skips_self_in_class_method(mock_tracer):
 
 def test_observe_skips_cls_in_classmethod(mock_tracer):
     """Test that cls is not captured for class methods."""
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         class TestClass:
             class_value = 20
@@ -324,11 +324,11 @@ def test_observe_skips_cls_in_classmethod(mock_tracer):
 def test_observe_async_class_method(mock_tracer):
     """Test async class method with self skipped."""
     import asyncio
-    from overmind.tracer import observe
+
 
     mock_tracer_obj, mock_span = mock_tracer
 
-    with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
+    with patch("overmind_sdk.tracer.get_tracer", return_value=mock_tracer_obj):
 
         class AsyncTestClass:
             def __init__(self):
