@@ -1,8 +1,7 @@
 import time
 import random
 import openai
-from overmind_sdk.tracer import tool, workflow, entry_point
-from overmind_sdk import init
+from overmind_sdk import init, tool, workflow, entry_point
 
 init(service_name="example-tracer", environment="development")
 
