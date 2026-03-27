@@ -11,7 +11,7 @@ from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindE
 from .tracing import init, get_tracer, set_user, set_tag, capture_exception
 from opentelemetry.overmind.prompt import PromptString
 
-from .tracer import trace_function
+from .tracer import observe, SpanType, function, entry_point, workflow, tool
 
 
 __version__ = "0.1.32"
@@ -26,5 +26,10 @@ __all__ = [
     "set_tag",
     "capture_exception",
     "PromptString",
-    "trace_function",
+    "observe",
+    "SpanType",
+    "function",
+    "entry_point",
+    "workflow",
+    "tool",
 ]

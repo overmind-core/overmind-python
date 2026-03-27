@@ -5,6 +5,7 @@ This module provides a decorator that automatically traces function calls,
 capturing inputs and outputs in OpenTelemetry style.
 """
 
+from enum import Enum
 from functools import wraps
 import inspect
 from typing import Any, Callable, Optional
@@ -13,6 +14,13 @@ from opentelemetry.trace import Status, StatusCode
 
 from overmind_sdk.tracing import get_tracer
 from overmind_sdk.utils.serializers import serialize
+
+
+class SpanType(str, Enum):
+    FUNCTION = "function"
+    ENTRY_POINT = "entry_point"
+    WORKFLOW = "workflow"
+    TOOL = "tool"
 
 
 def _prepare_for_otel(value: Any) -> Any:
@@ -40,7 +48,7 @@ def _prepare_for_otel(value: Any) -> Any:
     return str(value)
 
 
-def trace_function(span_name: Optional[str] = None, type: str = "function"):
+def observe(span_name: Optional[str] = None, type: SpanType = SpanType.FUNCTION):
     """
     Decorator that automatically traces function execution with OpenTelemetry.
 
@@ -49,21 +57,22 @@ def trace_function(span_name: Optional[str] = None, type: str = "function"):
 
     Args:
         span_name: Optional name for the span. If not provided, uses the function name.
-        type: type of the span. Can be "function", "workflow", "tool", "knowledge_base"
+        type: The type of span, as a SpanType enum value.
 
     Example:
         ```python
-        @trace_function(span_name="process_data")
+        @observe(span_name="process_data", type=SpanType.FUNCTION)
         def process_data(user_id: int, data: dict):
             return {"result": "success"}
 
-        @trace_function()  # Uses function name as span name
+        @observe()  # Uses function name as span name
         async def async_operation(param: str):
             return await some_async_call(param)
         ```
 
     The decorator will:
     - Create a span with the specified name (or function name)
+    - Set the span name and type as attributes
     - Capture all function arguments as span attributes (skips self/cls for class methods)
     - Capture the return value as a span attribute
     - Record exceptions if they occur
@@ -96,6 +105,9 @@ def trace_function(span_name: Optional[str] = None, type: str = "function"):
                 # Start span
                 with tracer.start_as_current_span(name) as span:
                     try:
+                        span.set_attribute("name", name)
+                        span.set_attribute("type", type.value)
+
                         # Capture inputs
                         inputs = {}
 
@@ -152,6 +164,9 @@ def trace_function(span_name: Optional[str] = None, type: str = "function"):
                 # Start span
                 with tracer.start_as_current_span(name) as span:
                     try:
+                        span.set_attribute("name", name)
+                        span.set_attribute("type", type.value)
+
                         # Capture inputs
                         inputs = {}
 
@@ -234,56 +249,61 @@ def conversation(conversation_id: str):
     return decorator
 
 
-def task(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+def function(name: Optional[str] = None):
     """
-    Decorator that automatically traces a task with OpenTelemetry.
+    Decorator that traces a function span.
+
+    Args:
+        name: Optional span name. Defaults to the decorated function's name.
+
+    Example:
+        @function(name="process_data")
+        def process_data(user_id: int):
+            ...
     """
-
-    def decorator(fn: Callable) -> Callable:
-        return trace_function(span_name=f"task.{name}", type="task")
-
-    return decorator
+    return observe(span_name=name, type=SpanType.FUNCTION)
 
 
-def workflow(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+def entry_point(name: Optional[str] = None):
     """
-    Decorator that automatically traces a workflow with OpenTelemetry.
+    Decorator that traces an entry point span.
+
+    Args:
+        name: Optional span name. Defaults to the decorated function's name.
+
+    Example:
+        @entry_point(name="api_handler")
+        async def handle_request(request):
+            ...
     """
-
-    def decorator(fn: Callable) -> Callable:
-        return trace_function(span_name=f"workflow.{name}", type="workflow")
-
-    return decorator
+    return observe(span_name=name, type=SpanType.ENTRY_POINT)
 
 
-def agent(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+def workflow(name: Optional[str] = None):
     """
-    Decorator that automatically traces an agent with OpenTelemetry.
+    Decorator that traces a workflow span.
+
+    Args:
+        name: Optional span name. Defaults to the decorated function's name.
+
+    Example:
+        @workflow(name="onboarding_flow")
+        def run_onboarding(user_id: str):
+            ...
     """
-
-    def decorator(fn: Callable) -> Callable:
-        return trace_function(span_name=f"agent.{name}", type="agent")
-
-    return decorator
+    return observe(span_name=name, type=SpanType.WORKFLOW)
 
 
-def tool(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
+def tool(name: Optional[str] = None):
     """
-    Decorator that automatically traces a tool with OpenTelemetry.
+    Decorator that traces a tool span.
+
+    Args:
+        name: Optional span name. Defaults to the decorated function's name.
+
+    Example:
+        @tool(name="web_search")
+        def search(query: str):
+            ...
     """
-
-    def decorator(fn: Callable) -> Callable:
-        return trace_function(span_name=f"tool.{name}", type="tool")
-
-    return decorator
-
-
-def knowledge_base(name: Optional[str] = None, version: Optional[int] = None, method_name: Optional[str] = None):
-    """
-    Decorator that automatically traces a knowledge base with OpenTelemetry.
-    """
-
-    def decorator(fn: Callable) -> Callable:
-        return trace_function(span_name=f"knowledge_base.{name}", type="knowledge_base")
-
-    return decorator
+    return observe(span_name=name, type=SpanType.TOOL)

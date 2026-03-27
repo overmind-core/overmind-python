@@ -1,5 +1,5 @@
 """
-Unit tests for the trace_function decorator.
+Unit tests for the observe decorator.
 """
 
 import pytest
@@ -32,15 +32,15 @@ def mock_tracer():
     return mock_tracer, mock_span
 
 
-def test_trace_function_sync_basic(mock_tracer):
+def test_observe_sync_basic(mock_tracer):
     """Test basic synchronous function tracing."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def add_numbers(a: int, b: int):
             return a + b
 
@@ -52,15 +52,15 @@ def test_trace_function_sync_basic(mock_tracer):
         mock_span.set_status.assert_called_once_with(Status(StatusCode.OK))
 
 
-def test_trace_function_with_custom_span_name(mock_tracer):
+def test_observe_with_custom_span_name(mock_tracer):
     """Test decorator with custom span name."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function(span_name="custom_operation")
+        @observe(span_name="custom_operation")
         def my_function(x: int):
             return x * 2
 
@@ -70,15 +70,15 @@ def test_trace_function_with_custom_span_name(mock_tracer):
         mock_tracer_obj.start_as_current_span.assert_called_once_with("custom_operation")
 
 
-def test_trace_function_captures_inputs(mock_tracer):
+def test_observe_captures_inputs(mock_tracer):
     """Test that function inputs are captured."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def process_data(name: str, age: int, metadata: dict):
             return {"processed": True}
 
@@ -89,15 +89,15 @@ def test_trace_function_captures_inputs(mock_tracer):
         assert len(input_calls) > 0
 
 
-def test_trace_function_captures_outputs(mock_tracer):
+def test_observe_captures_outputs(mock_tracer):
     """Test that function outputs are captured."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def get_result():
             return {"status": "success", "value": 42}
 
@@ -109,15 +109,15 @@ def test_trace_function_captures_outputs(mock_tracer):
         assert len(output_calls) > 0
 
 
-def test_trace_function_handles_exceptions(mock_tracer):
+def test_observe_handles_exceptions(mock_tracer):
     """Test that exceptions are properly recorded."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def failing_function():
             raise ValueError("Test error")
 
@@ -134,16 +134,16 @@ def test_trace_function_handles_exceptions(mock_tracer):
         assert error_call[0][0].status_code == StatusCode.ERROR
 
 
-def test_trace_function_async(mock_tracer):
+def test_observe_async(mock_tracer):
     """Test async function tracing."""
     import asyncio
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function(span_name="async_operation")
+        @observe(span_name="async_operation")
         async def async_add(a: int, b: int):
             await asyncio.sleep(0.01)
             return a + b
@@ -155,16 +155,16 @@ def test_trace_function_async(mock_tracer):
         mock_span.set_status.assert_called_once_with(Status(StatusCode.OK))
 
 
-def test_trace_function_async_with_exception(mock_tracer):
+def test_observe_async_with_exception(mock_tracer):
     """Test async function exception handling."""
     import asyncio
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         async def async_fail():
             await asyncio.sleep(0.01)
             raise RuntimeError("Async error")
@@ -177,15 +177,15 @@ def test_trace_function_async_with_exception(mock_tracer):
         assert status_calls[-1][0][0].status_code == StatusCode.ERROR
 
 
-def test_trace_function_with_kwargs(mock_tracer):
+def test_observe_with_kwargs(mock_tracer):
     """Test function with keyword arguments."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def greet(name: str, greeting: str = "Hello"):
             return f"{greeting}, {name}!"
 
@@ -195,15 +195,15 @@ def test_trace_function_with_kwargs(mock_tracer):
         mock_tracer_obj.start_as_current_span.assert_called_once()
 
 
-def test_trace_function_preserves_function_metadata(mock_tracer):
+def test_observe_preserves_function_metadata(mock_tracer):
     """Test that function metadata is preserved."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def documented_function(param: int) -> int:
             """This is a test function."""
             return param * 2
@@ -212,15 +212,15 @@ def test_trace_function_preserves_function_metadata(mock_tracer):
         assert documented_function.__doc__ == "This is a test function."
 
 
-def test_trace_function_with_complex_types(mock_tracer):
+def test_observe_with_complex_types(mock_tracer):
     """Test tracing with complex data types."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def process_complex(data: dict, items: list):
             return {"processed": len(items), "data_keys": list(data.keys())}
 
@@ -230,15 +230,15 @@ def test_trace_function_with_complex_types(mock_tracer):
         mock_tracer_obj.start_as_current_span.assert_called_once()
 
 
-def test_trace_function_with_no_args(mock_tracer):
+def test_observe_with_no_args(mock_tracer):
     """Test function with no arguments."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def get_constant():
             return 42
 
@@ -248,15 +248,15 @@ def test_trace_function_with_no_args(mock_tracer):
         mock_tracer_obj.start_as_current_span.assert_called_once()
 
 
-def test_trace_function_with_positional_only_args(mock_tracer):
+def test_observe_with_positional_only_args(mock_tracer):
     """Test function with positional arguments."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
     with patch("overmind.tracer.get_tracer", return_value=mock_tracer_obj):
 
-        @trace_function()
+        @observe()
         def multiply(x, y):
             return x * y
 
@@ -266,9 +266,9 @@ def test_trace_function_with_positional_only_args(mock_tracer):
         mock_tracer_obj.start_as_current_span.assert_called_once()
 
 
-def test_trace_function_skips_self_in_class_method(mock_tracer):
+def test_observe_skips_self_in_class_method(mock_tracer):
     """Test that self is not captured for instance methods."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
@@ -278,7 +278,7 @@ def test_trace_function_skips_self_in_class_method(mock_tracer):
             def __init__(self):
                 self.value = 10
 
-            @trace_function()
+            @observe()
             def instance_method(self, x: int, y: int):
                 return self.value + x + y
 
@@ -294,9 +294,9 @@ def test_trace_function_skips_self_in_class_method(mock_tracer):
         assert "self" not in captured_inputs or '"self"' not in captured_inputs
 
 
-def test_trace_function_skips_cls_in_classmethod(mock_tracer):
+def test_observe_skips_cls_in_classmethod(mock_tracer):
     """Test that cls is not captured for class methods."""
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
@@ -306,7 +306,7 @@ def test_trace_function_skips_cls_in_classmethod(mock_tracer):
             class_value = 20
 
             @classmethod
-            @trace_function()
+            @observe()
             def class_method(cls, x: int, y: int):
                 return cls.class_value + x + y
 
@@ -321,10 +321,10 @@ def test_trace_function_skips_cls_in_classmethod(mock_tracer):
         assert "cls" not in captured_inputs or '"cls"' not in captured_inputs
 
 
-def test_trace_function_async_class_method(mock_tracer):
+def test_observe_async_class_method(mock_tracer):
     """Test async class method with self skipped."""
     import asyncio
-    from overmind.tracer import trace_function
+    from overmind.tracer import observe
 
     mock_tracer_obj, mock_span = mock_tracer
 
@@ -334,7 +334,7 @@ def test_trace_function_async_class_method(mock_tracer):
             def __init__(self):
                 self.value = 15
 
-            @trace_function()
+            @observe()
             async def async_method(self, x: int):
                 await asyncio.sleep(0.01)
                 return self.value * x
