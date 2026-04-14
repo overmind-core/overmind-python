@@ -195,7 +195,16 @@ def init(
     # Configure OTLP Exporter
     headers = {"X-API-Token": overmind_api_key}
 
-    otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
+    if overmind_base_url:
+        otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
+    else:
+        # No URL provided: fallback to writing spans to disk for local debugging
+        from overmind_sdk.filexporter import FileSpanExporter
+        otlp_exporter = FileSpanExporter(
+            file_name=os.environ.get("OVERMIND_TRACE_FILE", "overmind-traces.jsonl"),
+            write_mode="a"  # Append by default
+        )
+
     span_processor = BatchSpanProcessor(otlp_exporter)
     provider.add_span_processor(span_processor)
     span_processor.on_start = _span_processor_on_start
