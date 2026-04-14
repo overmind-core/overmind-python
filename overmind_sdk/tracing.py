@@ -201,8 +201,7 @@ def init(
         # No URL provided: fallback to writing spans to disk for local debugging
         from overmind_sdk.filexporter import FileSpanExporter
         otlp_exporter = FileSpanExporter(
-            file_name=os.environ.get("OVERMIND_TRACE_FILE", "overmind-traces.jsonl"),
-            write_mode="a"  # Append by default
+            file_path=os.environ.get("OVERMIND_TRACE_FILE", "overmind-traces.jsonl"),
         )
 
     span_processor = BatchSpanProcessor(otlp_exporter)
