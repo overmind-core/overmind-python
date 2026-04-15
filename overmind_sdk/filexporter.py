@@ -1,43 +1,35 @@
 from __future__ import annotations
 
+import json
 import threading
 from pathlib import Path
 from typing import IO, Sequence
 
-from opentelemetry.exporter.otlp.proto.common.trace_encoder import (
-    encode_spans,
-)
+from google.protobuf.json_format import MessageToDict
+from opentelemetry.exporter.otlp.proto.common.trace_encoder import encode_spans
 from opentelemetry.sdk.trace import ReadableSpan
 from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
 
-HEADER = b'OTEL BACKUP FILE\n'
-VERSION = b'VERSION 1\n'
 
 class FileSpanExporter(SpanExporter):
     def __init__(
         self,
-        file_path: str | Path | IO[bytes],
+        file_path: str | Path | IO[str],
     ) -> None:
         self.file_path = Path(file_path) if isinstance(file_path, str) else file_path
         self._lock = threading.Lock()
-        self._file: IO[bytes] | None = None
-        self._wrote_header = False
+        self._file: IO[str] | None = None
 
     def export(self, spans: Sequence[ReadableSpan]) -> SpanExportResult:
         with self._lock:
             if not self._file:
                 if isinstance(self.file_path, Path):
-                    self._file = self.file_path.open('ab')
+                    self._file = self.file_path.open('a', encoding='utf-8')
                 else:
                     self._file = self.file_path
-                if self._file.tell() == 0:
-                    self._file.write(HEADER)
-                    self._file.write(VERSION)
-            encoded_spans = encode_spans(spans)
-            size = encoded_spans.ByteSize()
-            # we can represent up to a 4GB message
-            self._file.write(size.to_bytes(4, 'big'))
-            self._file.write(encoded_spans.SerializeToString())
+            encoded = encode_spans(spans)
+            data = MessageToDict(encoded, preserving_proto_field_name=True)
+            self._file.write(json.dumps(data) + '\n')
             self._file.flush()
         return SpanExportResult.SUCCESS
 
@@ -49,5 +41,4 @@ class FileSpanExporter(SpanExporter):
             if self._file:
                 self._file.flush()
                 if self._file is not self.file_path:
-                    # don't close the file if it was passed in
                     self._file.close()
