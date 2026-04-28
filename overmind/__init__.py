@@ -1,13 +1,12 @@
 """
 Overmind Python Client
 
-A Python client for the Overmind API that provides easy access to AI provider endpoints
-with policy enforcement and automatic observability.
+A Python client for the Overmind API that provides automatic observability for
+LLM applications.
 """
 
 from opentelemetry.overmind.prompt import PromptString
 
-from .client import OvermindClient
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
 from .tracing import (
     SpanType,
@@ -28,7 +27,6 @@ __version__ = "0.1.39"
 __all__ = [
     "OvermindAPIError",
     "OvermindAuthenticationError",
-    "OvermindClient",
     "OvermindError",
     "PromptString",
     "SpanType",

@@ -6,10 +6,8 @@ import io
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 from rich.console import Console
-
-from .utils.formatters import summarize_proxy_run
 
 
 class ReadableBaseModel(BaseModel):
@@ -21,7 +19,6 @@ class ReadableBaseModel(BaseModel):
 
         This is called by the Python REPL when you inspect an object.
         """
-        # Create a Rich Console that captures output to a string
         string_buffer = io.StringIO()
         console = Console(file=string_buffer, force_terminal=True)
         console.print(self)
@@ -34,8 +31,6 @@ class AgentCreateRequest(ReadableBaseModel):
     agent_id: str = Field(..., description="Unique identifier for the agent")
     agent_model: str | None = Field(None, description="The AI model to use (e.g., 'gpt-5-mini')")
     agent_description: str | None = Field(None, description="Description of the agent")
-    input_policies: list[str] | None = Field(default=[], description="List of input policy IDs")
-    output_policies: list[str] | None = Field(default=[], description="List of output policy IDs")
     stats: dict[str, Any] | None = Field(default={}, description="Agent statistics")
     parameters: dict[str, Any] | None = Field(default={}, description="Agent parameters")
 
@@ -46,8 +41,6 @@ class AgentUpdateRequest(ReadableBaseModel):
     agent_id: str = Field(..., description="Unique identifier for the agent")
     agent_model: str | None = Field(None, description="The AI model to use")
     agent_description: str | None = Field(None, description="Description of the agent")
-    input_policies: list[str] | None = Field(None, description="List of input policy IDs")
-    output_policies: list[str] | None = Field(None, description="List of output policy IDs")
     stats: dict[str, Any] | None = Field(None, description="Agent statistics")
     parameters: dict[str, Any] | None = Field(None, description="Agent parameters")
 
@@ -58,59 +51,11 @@ class AgentResponse(ReadableBaseModel):
     agent_id: str
     agent_model: str | None
     agent_description: str | None
-    input_policies: list[str] | None
-    output_policies: list[str] | None
     stats: dict[str, Any] | None
     parameters: dict[str, Any] | None
     business_id: str
     created_at: datetime | None
     updated_at: datetime | None
-
-
-class PolicyCreateRequest(ReadableBaseModel):
-    """Model for creating a new policy."""
-
-    policy_id: str = Field(..., description="Unique identifier for the policy")
-    policy_description: str = Field(..., description="Description of the policy")
-    parameters: dict[str, Any] = Field(..., description="Policy parameters")
-    policy_template: str = Field(..., description="Policy template")
-    is_input_policy: bool = Field(..., description="Whether this is an input policy")
-    is_output_policy: bool = Field(..., description="Whether this is an output policy")
-    stats: dict[str, Any] | None = Field(default={}, description="Policy statistics")
-
-    @model_validator(mode="after")
-    def validate_policy_type(self):
-        """Ensure at least one of is_input_policy or is_output_policy is True."""
-        if not self.is_input_policy and not self.is_output_policy:
-            raise ValueError("At least one of is_input_policy or is_output_policy must be True")
-        return self
-
-
-class PolicyUpdateRequest(ReadableBaseModel):
-    """Model for updating an existing policy."""
-
-    policy_id: str = Field(..., description="Unique identifier for the policy")
-    policy_description: str | None = Field(None, description="Description of the policy")
-    parameters: dict[str, Any] | None = Field(None, description="Policy parameters")
-    policy_template: str | None = Field(None, description="Policy template")
-    is_input_policy: bool | None = Field(None, description="Whether this is an input policy")
-    is_output_policy: bool | None = Field(None, description="Whether this is an output policy")
-    stats: dict[str, Any] | None = Field(None, description="Policy statistics")
-
-
-class PolicyResponse(ReadableBaseModel):
-    """Model for policy response data."""
-
-    policy_id: str
-    policy_description: str
-    parameters: dict[str, Any]
-    policy_template: str
-    stats: dict[str, Any]
-    is_input_policy: bool
-    is_output_policy: bool
-    created_at: datetime | None
-    updated_at: datetime | None
-    is_built_in: bool | None = False
 
 
 class LayerResponse(BaseModel):
@@ -120,17 +65,3 @@ class LayerResponse(BaseModel):
     overall_policy_outcome: str
     processed_data: str | None
     span_context: dict[str, Any]
-
-
-class ProxyRunResponse(ReadableBaseModel):
-    """Model for proxy run response data."""
-
-    llm_client_response: dict[str, Any]
-    input_layer_results: dict[str, Any]
-    output_layer_results: dict[str, Any]
-    processed_output: Any
-    processed_input: Any
-    span_context: dict[str, Any]
-
-    def summary(self) -> None:
-        summarize_proxy_run(self)
