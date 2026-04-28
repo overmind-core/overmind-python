@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "overmind-sdk"
-version = "0.1.38"
+name = "overmind"
+version = "0.1.39"
 description = "Python client for Overmind API"
 authors = ["Overmind Ltd"]
 readme = "README.md"
-packages = [{include = "overmind_sdk"}]
+packages = [{include = "overmind"}]
 homepage = "https://github.com/overmind-core/overmind-python"
 repository = "https://github.com/overmind-core/overmind-python"
 keywords = ["overmind", "ai", "api", "client", "policy", "enforcement"]
@@ -65,7 +65,7 @@ openai = "^2.26.0"
 line-length = 120
 indent-width = 4
 target-version = "py310"
-include = ["overmind_sdk/**/*.py", "tests/**/*.py"]
+include = ["overmind/**/*.py", "tests/**/*.py"]
 preview = true
 
 [tool.ruff.format]

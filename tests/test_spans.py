@@ -4,7 +4,7 @@ import os
 import requests
 from time import sleep
 from opentelemetry import trace as otel_trace
-from overmind_sdk.tracing import init
+from overmind.tracing import init
 from openai import OpenAI
 
 

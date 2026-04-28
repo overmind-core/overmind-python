@@ -1,7 +1,7 @@
 # Overmind SDK
 
 [![CI Checks](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml/badge.svg)](https://github.com/overmind-core/overmind-python/actions/workflows/publish.yml)
-[![PyPI version](https://img.shields.io/pypi/v/overmind-sdk.svg)](https://pypi.org/project/overmind-sdk/)
+[![PyPI version](https://img.shields.io/pypi/v/overmind.svg)](https://pypi.org/project/overmind/)
 
 Automatic observability for LLM applications. One call to `init()` instruments your existing OpenAI, Anthropic, Google Gemini, or Agno code — no proxy, no key sharing, no import changes.
 
@@ -16,16 +16,16 @@ Automatic observability for LLM applications. One call to `init()` instruments y
 ## Installation
 
 ```bash
-pip install overmind-sdk
+pip install overmind
 ```
 
 Install alongside your LLM provider package:
 
 ```bash
-pip install overmind-sdk openai          # OpenAI
-pip install overmind-sdk anthropic       # Anthropic
-pip install overmind-sdk google-genai    # Google Gemini
-pip install overmind-sdk agno            # Agno
+pip install overmind openai          # OpenAI
+pip install overmind anthropic       # Anthropic
+pip install overmind google-genai    # Google Gemini
+pip install overmind agno            # Agno
 ```
 
 ---
@@ -41,7 +41,7 @@ Sign up at [console.overmindlab.ai](https://console.overmindlab.ai) — your API
 Call `init()` once at application startup, before any LLM calls:
 
 ```python
-from overmind_sdk import init
+from overmind import init
 
 init(
     overmind_api_key="ovr_...",    # or set OVERMIND_API_KEY env var
@@ -75,7 +75,7 @@ Traces appear in your [Overmind dashboard](https://console.overmindlab.ai) in re
 ### OpenAI
 
 ```python
-from overmind_sdk import init
+from overmind import init
 from openai import OpenAI
 
 init(service_name="my-service", providers=["openai"])
@@ -90,7 +90,7 @@ response = client.chat.completions.create(
 ### Anthropic
 
 ```python
-from overmind_sdk import init
+from overmind import init
 import anthropic
 
 init(service_name="my-service", providers=["anthropic"])
@@ -106,7 +106,7 @@ message = client.messages.create(
 ### Google Gemini
 
 ```python
-from overmind_sdk import init
+from overmind import init
 from google import genai
 
 init(service_name="my-service", providers=["google"])
@@ -121,7 +121,7 @@ response = client.models.generate_content(
 ### Agno
 
 ```python
-from overmind_sdk import init
+from overmind import init
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
@@ -136,7 +136,7 @@ agent.print_response("Write a short poem about the sea.")
 Pass an empty `providers` list (or omit it) to automatically instrument every supported provider that is installed:
 
 ```python
-from overmind_sdk import init
+from overmind import init
 
 init(service_name="my-service")  # auto-detects openai, anthropic, google, agno
 ```
@@ -173,7 +173,7 @@ init(service_name="my-service")  # auto-detects openai, anthropic, google, agno
 Get the OpenTelemetry tracer to create custom spans around any block of code:
 
 ```python
-from overmind_sdk import init, get_tracer
+from overmind import init, get_tracer
 
 init(service_name="my-service")
 
@@ -189,7 +189,7 @@ with tracer.start_as_current_span("process-document") as span:
 Tag the current trace with user identity. Call this in your request handler or middleware:
 
 ```python
-from overmind_sdk import set_user
+from overmind import set_user
 
 # In a FastAPI middleware:
 @app.middleware("http")
@@ -213,7 +213,7 @@ async def add_user_context(request: Request, call_next):
 Add a custom attribute to the current span:
 
 ```python
-from overmind_sdk import set_tag
+from overmind import set_tag
 
 set_tag("feature.flag", "new-checkout-flow")
 set_tag("tenant.id", tenant_id)
@@ -224,7 +224,7 @@ set_tag("tenant.id", tenant_id)
 Record an exception on the current span and mark it as an error:
 
 ```python
-from overmind_sdk import capture_exception
+from overmind import capture_exception
 
 try:
     result = risky_llm_call()
@@ -239,7 +239,7 @@ except Exception as e:
 
 ```python
 import os
-from overmind_sdk import init, get_tracer, set_user, set_tag, capture_exception
+from overmind import init, get_tracer, set_user, set_tag, capture_exception
 from openai import OpenAI
 
 os.environ["OVERMIND_API_KEY"] = "ovr_your_key_here"

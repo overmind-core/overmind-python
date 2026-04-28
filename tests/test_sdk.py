@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture(autouse=True)
 def reset_sdk_state():
     """Reset SDK state before each test."""
-    import overmind_sdk.tracing as sdk
+    import overmind.tracing as sdk
 
     sdk._initialized = False
     sdk._tracer = None
@@ -24,10 +24,10 @@ def mock_opentelemetry():
     mock_openai_class = MagicMock()
 
     with (
-        patch("overmind_sdk.tracing.TracerProvider") as mock_provider,
-        patch("overmind_sdk.tracing.OTLPSpanExporter") as mock_exporter,
-        patch("overmind_sdk.tracing.BatchSpanProcessor") as mock_processor,
-        patch("overmind_sdk.tracing.trace") as mock_trace,
+        patch("overmind.tracing.TracerProvider") as mock_provider,
+        patch("overmind.tracing.OTLPSpanExporter") as mock_exporter,
+        patch("overmind.tracing.BatchSpanProcessor") as mock_processor,
+        patch("overmind.tracing.trace") as mock_trace,
     ):
         # Set up tracer mock
         mock_tracer = MagicMock()
@@ -44,7 +44,7 @@ def mock_opentelemetry():
 
 def test_sdk_init_configures_tracing(mock_opentelemetry):
     """Test that calling init configures OpenTelemetry correctly."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     with (
         patch.object(tracing, "FastAPIInstrumentor", create=True) as mock_fastapi,
@@ -76,13 +76,13 @@ def test_sdk_init_configures_tracing(mock_opentelemetry):
 
 def test_sdk_init_only_once():
     """Test that init only runs once."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     with (
-        patch("overmind_sdk.tracing.TracerProvider"),
-        patch("overmind_sdk.tracing.OTLPSpanExporter"),
-        patch("overmind_sdk.tracing.BatchSpanProcessor"),
-        patch("overmind_sdk.tracing.trace") as mock_trace,
+        patch("overmind.tracing.TracerProvider"),
+        patch("overmind.tracing.OTLPSpanExporter"),
+        patch("overmind.tracing.BatchSpanProcessor"),
+        patch("overmind.tracing.trace") as mock_trace,
     ):
         tracing.init(overmind_api_key="test_key", overmind_base_url="http://localhost:4318")
         tracing.init(overmind_api_key="test_key", overmind_base_url="http://localhost:4318")
@@ -93,13 +93,13 @@ def test_sdk_init_only_once():
 
 def test_sdk_init_handles_missing_deps():
     """Test that init doesn't crash if optional instrumentation libraries are missing."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     with (
-        patch("overmind_sdk.tracing.TracerProvider"),
-        patch("overmind_sdk.tracing.OTLPSpanExporter"),
-        patch("overmind_sdk.tracing.BatchSpanProcessor"),
-        patch("overmind_sdk.tracing.trace"),
+        patch("overmind.tracing.TracerProvider"),
+        patch("overmind.tracing.OTLPSpanExporter"),
+        patch("overmind.tracing.BatchSpanProcessor"),
+        patch("overmind.tracing.trace"),
     ):
         # Should not raise exception even if instrumentors fail to import
         tracing.init(overmind_api_key="test_key", overmind_base_url="http://localhost:4318")
@@ -107,7 +107,7 @@ def test_sdk_init_handles_missing_deps():
 
 def test_get_tracer_before_init():
     """Test that get_tracer raises if SDK not initialized."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     with pytest.raises(RuntimeError, match="not initialized"):
         tracing.get_tracer()
@@ -115,7 +115,7 @@ def test_get_tracer_before_init():
 
 def test_get_tracer_after_init(mock_opentelemetry):
     """Test that get_tracer returns tracer after init."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     tracing.init(overmind_api_key="test_key", overmind_base_url="http://localhost:4318")
 
@@ -125,7 +125,7 @@ def test_get_tracer_after_init(mock_opentelemetry):
 
 def test_set_user(mock_opentelemetry):
     """Test that set_user adds user attributes to current span."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     mock_span = MagicMock()
     mock_span.is_recording.return_value = True
@@ -140,7 +140,7 @@ def test_set_user(mock_opentelemetry):
 
 def test_set_tag(mock_opentelemetry):
     """Test that set_tag adds custom attributes to current span."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     mock_span = MagicMock()
     mock_span.is_recording.return_value = True
@@ -154,7 +154,7 @@ def test_set_tag(mock_opentelemetry):
 
 def test_capture_exception(mock_opentelemetry):
     """Test that capture_exception records exception on current span."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     mock_span = MagicMock()
     mock_span.is_recording.return_value = True
@@ -187,14 +187,14 @@ def test_fastapi_request_flow():
 
 def test_service_name_from_env():
     """Test that service name can be set via environment variable."""
-    from overmind_sdk import tracing
+    from overmind import tracing
 
     with (
-        patch("overmind_sdk.tracing.TracerProvider") as mock_provider,
-        patch("overmind_sdk.tracing.OTLPSpanExporter"),
-        patch("overmind_sdk.tracing.BatchSpanProcessor"),
-        patch("overmind_sdk.tracing.trace"),
-        patch("overmind_sdk.tracing.Resource") as mock_resource,
+        patch("overmind.tracing.TracerProvider") as mock_provider,
+        patch("overmind.tracing.OTLPSpanExporter"),
+        patch("overmind.tracing.BatchSpanProcessor"),
+        patch("overmind.tracing.trace"),
+        patch("overmind.tracing.Resource") as mock_resource,
         patch.dict(os.environ, {"OVERMIND_SERVICE_NAME": "env-service"}),
     ):
         tracing.init(overmind_api_key="test_key", overmind_base_url="http://localhost:4318")
