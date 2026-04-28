@@ -8,13 +8,24 @@ with policy enforcement and automatic observability.
 from .client import OvermindClient
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
 
-from .tracing import init, get_tracer, set_user, set_tag, capture_exception
+from .tracing import (
+    init,
+    get_tracer,
+    set_user,
+    set_tag,
+    capture_exception,
+    observe,
+    SpanType,
+    start_span,
+    function,
+    entry_point,
+    workflow,
+    tool,
+)
 from opentelemetry.overmind.prompt import PromptString
 
-from .tracer import observe, SpanType, function, entry_point, workflow, tool
 
-
-__version__ = "0.1.32"
+__version__ = "0.1.33"
 __all__ = [
     "OvermindClient",
     "OvermindError",
@@ -27,6 +38,7 @@ __all__ = [
     "capture_exception",
     "PromptString",
     "observe",
+    "start_span",
     "SpanType",
     "function",
     "entry_point",
