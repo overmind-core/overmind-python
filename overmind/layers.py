@@ -1,6 +1,7 @@
-from overmind_sdk.client import get_layers_client, OvermindLayersClient
-from overmind_sdk.models import LayerResponse
-from typing import Sequence
+from collections.abc import Sequence
+
+from overmind.client import OvermindLayersClient, get_layers_client
+from overmind.models import LayerResponse
 
 
 class GenericOvermindLayer:

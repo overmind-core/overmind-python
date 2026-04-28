@@ -1,16 +1,17 @@
-from collections.abc import Iterator
-import json
-from pathlib import Path
-from overmind_sdk.tracing import init, get_tracer
-from tqdm import tqdm
-from opentelemetry import trace
-from typing import Dict, Optional
-from pydantic import BaseModel, ConfigDict, Field
 import csv
+import json
+from collections.abc import Iterator
+from pathlib import Path
+
+from opentelemetry import trace
 from opentelemetry.trace import SpanKind
+from pydantic import BaseModel, ConfigDict, Field
+from tqdm import tqdm
+
+from overmind.tracing import get_tracer, init
 
 
-def get_log_item_model(mapping: Dict[str, str] = None):
+def get_log_item_model(mapping: dict[str, str] | None = None):
     if mapping is None:
         mapping = {}
 
@@ -25,29 +26,29 @@ def get_log_item_model(mapping: Dict[str, str] = None):
         end_time: int = Field(..., alias=get_field("end_time"))
 
         # custom IDs (must be valid 32/16 hex chars)
-        trace_state: Optional[str] = Field(default=None, alias=get_field("trace_state"), max_length=32, min_length=16)
-        trace_id: Optional[str] = Field(default=None, alias=get_field("trace_id"), max_length=32, min_length=16)
-        span_id: Optional[str] = Field(default=None, alias=get_field("span_id"), max_length=32, min_length=16)
-        parent_span_id: Optional[str] = Field(
+        trace_state: str | None = Field(default=None, alias=get_field("trace_state"), max_length=32, min_length=16)
+        trace_id: str | None = Field(default=None, alias=get_field("trace_id"), max_length=32, min_length=16)
+        span_id: str | None = Field(default=None, alias=get_field("span_id"), max_length=32, min_length=16)
+        parent_span_id: str | None = Field(
             default=None,
             alias=get_field("parent_span_id"),
             max_length=32,
             min_length=16,
         )
 
-        name: Optional[str] = Field(default="log-ingestion-service", alias=get_field("name"))
+        name: str | None = Field(default="log-ingestion-service", alias=get_field("name"))
         kind: int = Field(default=2, alias=get_field("kind"))
 
         status_code: int = Field(default=0, alias=get_field("status_code"))
         status_message: str = Field(default="", alias=get_field("status_message"))
-        extra_attributes: Dict[str, str] = Field(..., default_factory=dict, alias=get_field("extra_attributes"))
+        extra_attributes: dict[str, str] = Field(..., default_factory=dict, alias=get_field("extra_attributes"))
 
         model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
     return LogItem
 
 
-def process_log_item(item: dict, mapping: Dict[str, str]):
+def process_log_item(item: dict, mapping: dict[str, str]):
     log_model = get_log_item_model(mapping)
     log_item = log_model.model_validate(item, by_alias=True)
 
@@ -93,18 +94,16 @@ def load_from_jsonl(filepath: str) -> Iterator[dict]:
 def load_from_json(filepath: str) -> Iterator[dict]:
     with open(filepath, "r") as f:
         data = json.load(f)
-        for item in data:
-            yield item
+        yield from data
 
 
 def load_from_csv(filepath: str) -> Iterator[dict]:
     with open(filepath, "r", newline="") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            yield row
+        yield from reader
 
 
-def ingest_logs(filepath: str, mapping: Dict[str, str], **kwargs):
+def ingest_logs(filepath: str, mapping: dict[str, str], **kwargs):
     if kwargs.get("overmind_api_key"):
         init(overmind_api_key=kwargs.get("overmind_api_key"))
     else:

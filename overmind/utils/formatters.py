@@ -1,10 +1,10 @@
-from rich.console import Console, Group
-from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
-from rich.syntax import Syntax
 import json
 
+from rich.console import Console, Group
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.table import Table
+from rich.text import Text
 
 res_map = {
     "passed": {"color": "green", "emoji": "✅"},

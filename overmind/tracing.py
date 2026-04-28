@@ -25,13 +25,13 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv_ai import SpanAttributes
 from opentelemetry.trace import Status, StatusCode
 
-from overmind_sdk.utils.api_settings import get_api_settings
-from overmind_sdk.utils.serializers import serialize
+from overmind.utils.api_settings import get_api_settings
+from overmind.utils.serializers import serialize
 
 logger = logging.getLogger(__name__)
 
 try:
-    _SDK_VERSION = importlib.metadata.version("overmind_sdk")
+    _SDK_VERSION = importlib.metadata.version("overmind")
 except importlib.metadata.PackageNotFoundError:
     _SDK_VERSION = "unknown"
 

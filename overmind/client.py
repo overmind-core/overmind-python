@@ -3,18 +3,17 @@ Main Overmind client implementation.
 """
 
 import os
+from collections.abc import Sequence
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any
 from urllib.parse import urljoin
 
 import requests
 
 from .exceptions import OvermindAPIError, OvermindAuthenticationError, OvermindError
-from .models import LayerResponse
-from .policies import PoliciesClient
+from .models import LayerResponse, ProxyRunResponse
 from .utils.api_settings import get_api_settings
 from .utils.serializers import serialize
-from .models import ProxyRunResponse
 
 # Mapping of common environment variables to provider parameter names
 COMMON_ENV_VARS = {
@@ -29,7 +28,7 @@ class ClientPathProxy:
     This allows for syntax like: client.openai.chat.completions.create(...)
     """
 
-    def __init__(self, client, path_parts: List[str]):
+    def __init__(self, client, path_parts: list[str]):
         self.client = client
         self.path_parts = path_parts
 
@@ -77,9 +76,9 @@ class OvermindClient:
 
     def __init__(
         self,
-        overmind_api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        **provider_parameters: Dict[str, Any],
+        overmind_api_key: str | None = None,
+        base_url: str | None = None,
+        **provider_parameters: dict[str, Any],
     ):
         """
         Initialize the Overmind client.
@@ -112,9 +111,6 @@ class OvermindClient:
             }
         )
 
-        # Initialize sub-clients
-        self.policies = PoliciesClient(self)
-
         # Cache for provider proxies
         self._provider_proxies = {}
 
@@ -132,9 +128,9 @@ class OvermindClient:
         self,
         method: str,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Make an HTTP request to the Overmind API.
 
@@ -170,16 +166,16 @@ class OvermindClient:
             return response.json() if response.content else {}
 
         except requests.exceptions.RequestException as e:
-            raise OvermindError(f"Request failed: {str(e)}")
+            raise OvermindError(f"Request failed: {e!s}")
 
     def invoke(
         self,
         client_path: str,
-        client_call_params: Dict[str, Any],
+        client_call_params: dict[str, Any],
         agent_id: str = "default_agent",
-        client_init_params: Optional[Dict[str, Any]] = None,
-        input_policies: Optional[List[str]] = None,
-        output_policies: Optional[List[str]] = None,
+        client_init_params: dict[str, Any] | None = None,
+        input_policies: list[str] | None = None,
+        output_policies: list[str] | None = None,
     ) -> ProxyRunResponse:
         """
         Invoke an AI provider through the Overmind API.
@@ -212,9 +208,9 @@ class OvermindClient:
 class OvermindLayersClient:
     def __init__(
         self,
-        overmind_api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        traces_base_url: Optional[str] = None,
+        overmind_api_key: str | None = None,
+        base_url: str | None = None,
+        traces_base_url: str | None = None,
     ):
         self.overmind_api_key, self.base_url = get_api_settings(overmind_api_key, base_url)
         self.session = requests.Session()
@@ -252,8 +248,8 @@ class OvermindLayersClient:
 
 @lru_cache
 def get_layers_client(
-    overmind_api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-    traces_base_url: Optional[str] = None,
+    overmind_api_key: str | None = None,
+    base_url: str | None = None,
+    traces_base_url: str | None = None,
 ):
     return OvermindLayersClient(overmind_api_key, base_url, traces_base_url)

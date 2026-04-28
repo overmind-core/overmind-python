@@ -1,8 +1,10 @@
 import json
+import logging
 from pathlib import PurePath
 
 _MAX_ATTR_LEN = 32_000
 
+logger = logging.getLogger(__name__)
 
 def _default_serializer(obj):
     if isinstance(obj, PurePath):
@@ -15,7 +17,7 @@ def _default_serializer(obj):
         try:
             return obj.model_dump()
         except Exception:
-            pass
+            logger.exception("Error serializing object")
     if hasattr(obj, "__dict__"):
         return {k: v for k, v in obj.__dict__.items() if not k.startswith("_")}
     return repr(obj)
