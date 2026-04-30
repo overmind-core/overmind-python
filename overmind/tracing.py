@@ -155,6 +155,37 @@ def _span_processor_on_start(span: trace.Span, parent_context: trace.Context | N
 
 
 # ---------------------------------------------------------------------------
+# Remote parent context propagation (subprocess / distributed tracing)
+# ---------------------------------------------------------------------------
+
+
+def _attach_remote_parent_if_present() -> None:
+    """Attach a remote parent span from the ``TRACEPARENT`` environment variable.
+
+    The overclaw optimizer injects ``TRACEPARENT`` (W3C Trace Context format)
+    into every agent subprocess before spawning it.  Calling this function
+    immediately after the TracerProvider is registered makes every OTel span
+    started in the subprocess a child of the optimizer's current span, so all
+    per-case evaluation runs appear under a single unified parent trace.
+
+    Safe to call when ``TRACEPARENT`` is absent — no-op in that case.
+    """
+    raw = os.environ.get("TRACEPARENT") or os.environ.get("OTEL_TRACEPARENT")
+    if not raw:
+        return
+    try:
+        from opentelemetry import context as _ctx
+        from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+        propagator = TraceContextTextMapPropagator()
+        remote_ctx = propagator.extract(carrier={"traceparent": raw.strip()})
+        _ctx.attach(remote_ctx)
+        logger.debug("Attached remote parent context from TRACEPARENT: %s", raw)
+    except Exception as exc:
+        logger.debug("Could not attach remote parent context: %s", exc)
+
+
+# ---------------------------------------------------------------------------
 # SDK initialization
 # ---------------------------------------------------------------------------
 
@@ -223,7 +254,20 @@ def init(
 
     otlp_exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
 
-    span_processor = BatchSpanProcessor(otlp_exporter)
+    # Tighten the batch flush cadence so closed child spans show up in the
+    # backend within ~2s instead of the OTel default 5s.  Long-running
+    # workflow spans rely on this to stream progress while still open.
+    schedule_delay_millis = int(
+        os.environ.get("OVERMIND_SPAN_FLUSH_INTERVAL_MS", "2000")
+    )
+    max_export_batch_size = int(
+        os.environ.get("OVERMIND_SPAN_MAX_EXPORT_BATCH_SIZE", "256")
+    )
+    span_processor = BatchSpanProcessor(
+        otlp_exporter,
+        schedule_delay_millis=schedule_delay_millis,
+        max_export_batch_size=max_export_batch_size,
+    )
     provider.add_span_processor(span_processor)
     span_processor.on_start = _span_processor_on_start
 
@@ -233,6 +277,13 @@ def init(
     # Store tracer for custom spans
     _tracer = trace.get_tracer("overmind", _SDK_VERSION)
     enable_tracing(providers)
+
+    # Distributed tracing: if the process was spawned by the overclaw
+    # optimizer (or any other orchestrator) with a W3C TRACEPARENT env var,
+    # attach it as the ambient OTel context so every span created in this
+    # process becomes a child of the parent optimizer span — forming a single
+    # unified trace across subprocess boundaries.
+    _attach_remote_parent_if_present()
 
     _initialized = True
     logger.info("Overmind SDK initialized: service=%s, environment=%s", service_name, environment)
@@ -453,12 +504,18 @@ def observe(span_name: str | None = None, type: SpanType = SpanType.FUNCTION):
                                 continue
                             inputs[key] = _prepare_for_otel(value)
 
-                        otel_span.set_attribute("inputs", serialize(inputs))
+                        serialized_inputs = serialize(inputs)
+                        otel_span.set_attribute("inputs", serialized_inputs)
+                        # Also tag under the overclaw namespace so the backend
+                        # can extract I/O for dataset collection from any span.
+                        otel_span.set_attribute("overclaw.input_data", serialized_inputs)
 
                         result = await func(*args, **kwargs)
 
                         output = _prepare_for_otel(result)
-                        otel_span.set_attribute("outputs", serialize(output))
+                        serialized_output = serialize(output)
+                        otel_span.set_attribute("outputs", serialized_output)
+                        otel_span.set_attribute("overclaw.output_data", serialized_output)
 
                         otel_span.set_status(Status(StatusCode.OK))
 
@@ -498,12 +555,18 @@ def observe(span_name: str | None = None, type: SpanType = SpanType.FUNCTION):
                                 continue
                             inputs[key] = _prepare_for_otel(value)
 
-                        otel_span.set_attribute("inputs", serialize(inputs))
+                        serialized_inputs = serialize(inputs)
+                        otel_span.set_attribute("inputs", serialized_inputs)
+                        # Also tag under the overclaw namespace so the backend
+                        # can extract I/O for dataset collection from any span.
+                        otel_span.set_attribute("overclaw.input_data", serialized_inputs)
 
                         result = func(*args, **kwargs)
 
                         output = _prepare_for_otel(result)
-                        otel_span.set_attribute("outputs", serialize(output))
+                        serialized_output = serialize(output)
+                        otel_span.set_attribute("outputs", serialized_output)
+                        otel_span.set_attribute("overclaw.output_data", serialized_output)
 
                         otel_span.set_status(Status(StatusCode.OK))
 
